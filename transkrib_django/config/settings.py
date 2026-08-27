@@ -73,10 +73,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # SQLite хранится в /app/data — этот каталог монтируется как volume,
 # поэтому база переживает пересоздание контейнера.
+DATA_DIR = BASE_DIR / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "data" / "db.sqlite3",
+        "NAME": DATA_DIR / "db.sqlite3",
     }
 }
 
@@ -111,9 +114,16 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login/"
 
 # --- Транскрибация ----------------------------------------------------------
-# Внешний скрипт распознавания. Файл НЕ изменяется проектом и подключается
-# через volume ./scripts:/app/scripts (см. scripts/README.md).
-TRANSCRIBE_SCRIPT = env("TRANSCRIBE_SCRIPT", "scripts/1.py")
+# Каталог, в который кладётся файл скрипта транскрибации (по умолчанию scripts/).
+# Внутри контейнера подключается volume-ом ./scripts:/app/scripts, поэтому
+# файл можно менять на хосте без пересборки образа. Проект его НЕ модифицирует.
+TRANSCRIBE_SCRIPT_DIR = env("TRANSCRIBE_SCRIPT_DIR", "scripts")
+
+# Имя файла скрипта внутри каталога TRANSCRIBE_SCRIPT_DIR.
+TRANSCRIBE_SCRIPT_NAME = env("TRANSCRIBE_SCRIPT_NAME", "1.py")
+
+# Полный путь к скрипту (вычисляемый).
+TRANSCRIBE_SCRIPT_PATH = os.path.join(BASE_DIR, TRANSCRIBE_SCRIPT_DIR, TRANSCRIBE_SCRIPT_NAME)
 
 # Если у вашего скрипта другой интерфейс аргументов, задайте команду целиком,
 # например: TRANSCRIBE_CMD="python scripts/1.py {input} {output}"

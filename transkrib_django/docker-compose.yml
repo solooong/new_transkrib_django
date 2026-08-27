@@ -8,14 +8,17 @@ services:
     environment:
       DJANGO_DEBUG: "1"
       DJANGO_ALLOWED_HOSTS: "*"
-      # Внешний скрипт транскрибации (подключается volume-ом, проектом не изменяется).
-      TRANSCRIBE_SCRIPT: "scripts/1.py"
-      # Если у 1.py другой интерфейс аргументов, раскомментируйте и поправьте:
+      # Каталог, куда кладётся файл скрипта транскрибации (volume ниже).
+      TRANSCRIBE_SCRIPT_DIR: "scripts"
+      # Имя файла скрипта внутри каталога.
+      TRANSCRIBE_SCRIPT_NAME: "1.py"
+      # Если у скрипта другой интерфейс аргументов, раскомментируйте и поправьте:
       # TRANSCRIBE_CMD: "python scripts/1.py {input} {output}"
       MAX_CONCURRENT_TASKS: "1"
       METRICS_INTERVAL: "2"
     volumes:
-      # Ваш скрипт 1.py — кладёте в ./scripts на хосте, он попадает в контейнер как есть.
+      # Ваш скрипт транскрибации: положите файл 1.py в ./scripts на хосте —
+      # он попадёт в контейнер как есть и НЕ изменяется проектом.
       - ./scripts:/app/scripts
       # Загрузки и результаты транскрибации.
       - ./media:/app/media

@@ -44,7 +44,8 @@ docker compose up --build
 
 | Переменная | По умолчанию | Описание |
 | --- | --- | --- |
-| `TRANSCRIBE_SCRIPT` | `scripts/1.py` | Путь к внешнему скрипту |
+| `TRANSCRIBE_SCRIPT_DIR` | `scripts` | Каталог, куда кладётся файл скрипта транскрибации |
+| `TRANSCRIBE_SCRIPT_NAME` | `1.py` | Имя файла скрипта внутри каталога |
 | `TRANSCRIBE_CMD` | — | Полная команда с `{input}`/`{output}`, если аргументы другие |
 | `MAX_CONCURRENT_TASKS` | `1` | Одновременные задачи |
 | `METRICS_INTERVAL` | `2` | Интервал сбора метрик, сек |
