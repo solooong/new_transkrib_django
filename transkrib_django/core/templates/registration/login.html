@@ -1,0 +1,61 @@
+{% load static %}<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Вход · Транскриб</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'core/css/app.css' %}" />
+</head>
+<body class="login-body">
+  <div class="bg-layer" aria-hidden="true"></div>
+  <div class="bg-noise" aria-hidden="true"></div>
+
+  <main class="login-wrap">
+    <div class="login-card panel">
+      <div class="login-brand">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <path d="M3 12h2.2M6.6 8v8M10.2 4.5v15M13.8 7v10M17.4 9.5v5M21 12h.01" />
+          </svg>
+        </span>
+        <div>
+          <h1>Транскриб</h1>
+          <p>сервис транскрибации · локальный Docker</p>
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="login-error">
+          {% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" class="login-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next|default:'/' }}" />
+
+        <label class="field">
+          <span>Логин</span>
+          <input type="text" name="username" autofocus autocapitalize="none" autocomplete="username"
+                 placeholder="admin" value="{{ form.username.value|default:'' }}" required />
+        </label>
+
+        <label class="field">
+          <span>Пароль</span>
+          <input type="password" name="password" autocomplete="current-password" placeholder="••••••" required />
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          Войти в панель
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+
+      <p class="login-hint mono">демо-доступ: <b>admin</b> / <b>admin</b></p>
+    </div>
+  </main>
+</body>
+</html>

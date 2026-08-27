@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Задача #{{ task.pk }} · Транскриб{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <a href="{% url 'dashboard' %}" class="btn btn-ghost">← На обзор</a>
+  <div class="page-head-actions">
+    {% if task.status == "error" or task.status == "done" %}
+    <form method="post" action="{% url 'retry_task' task.pk %}" class="inline-form">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-warn btn-sm">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 3v4h-4"/></svg>
+        Повторить
+      </button>
+    </form>
+    {% endif %}
+    <form method="post" action="{% url 'delete_task' task.pk %}" class="inline-form"
+          onsubmit="return confirm('Удалить задачу #{{ task.pk }} вместе с файлами?');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-ghost btn-sm btn-danger-text">Удалить</button>
+    </form>
+  </div>
+</div>
+
+<!-- шапка задачи -->
+<section class="panel task-head">
+  <div class="task-head-main">
+    <div class="task-title-row">
+      <h1 class="page-title small">{{ task.display_name }}</h1>
+      <span id="status-slot" data-cell="status">
+        {% include "core/_status.html" with status=task.status progress=task.progress %}
+      </span>
+    </div>
+    <p class="mono task-id">task_{{ task.pk }} · создана {{ task.created_at|date:"d.m.Y H:i" }}
+      {% if task.finished_at %} · завершена {{ task.finished_at|date:"H:i:s" }}{% endif %}</p>
+  </div>
+
+  <div class="meta-grid">
+    <div class="meta-card"><p class="meta-k">Размер</p><p class="meta-v mono">{{ task.size_human }}</p></div>
+    <div class="meta-card"><p class="meta-k">Длительность</p><p class="meta-v mono">{{ task.duration_human }}</p></div>
+    <div class="meta-card"><p class="meta-k">Язык</p><p class="meta-v mono">{{ task.language }}</p></div>
+    <div class="meta-card"><p class="meta-k">Модель</p><p class="meta-v mono">{{ task.model }}</p></div>
+  </div>
+
+  {% if task.error %}
+  <div class="error-banner" id="error-banner">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 2.8 19.5h18.4L12 4zM12 10v4M12 17h.01"/></svg>
+    <p>{{ task.error }}</p>
+  </div>
+  {% endif %}
+</section>
+
+<div class="detail-grid">
+  <!-- журнал -->
+  <section class="panel log-panel">
+    <header class="panel-head">
+      <h2>Журнал выполнения</h2>
+      <span class="mono hint" id="log-hint">строк: {{ logs|length }}</span>
+    </header>
+    <div class="terminal" id="terminal">
+      {% for line in logs %}
+      <div class="log-line lvl-{{ line.level }}"><span class="log-t">{{ line.created_at|date:"H:i:s" }}</span>{{ line.text }}</div>
+      {% empty %}
+      <div class="log-line lvl-info"><span class="log-t">--:--:--</span>Ожидание первых строк вывода…</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- результаты -->
+  <section class="panel results-panel">
+    <header class="panel-head">
+      <h2>Результаты</h2>
+      <span class="mono hint">media/results/task_{{ task.pk }}/</span>
+    </header>
+
+    <div id="results-body">
+      {% if task.status == "done" and result_files %}
+        <ul class="results-list">
+          {% for f in result_files %}
+          <li class="result-item">
+            <span class="result-ico">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6V3zM14 3v4h4M9 12h6M9 16h6"/></svg>
+            </span>
+            <div class="result-meta">
+              <p class="result-name mono">{{ f.name }}</p>
+              <p class="result-size mono">{{ f.size }}</p>
+            </div>
+            <a class="btn btn-ghost btn-sm" href="{% url 'download_result' task.pk f.name %}">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M6 10l6 6 6-6M4 20h16"/></svg>
+              Скачать
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      {% elif task.status == "error" %}
+        <div class="results-placeholder warn">
+          <p>Выполнение прервалось с ошибкой.</p>
+          <p class="mono">Повторите запуск — журнал сохранится ниже.</p>
+        </div>
+      {% else %}
+        <div class="results-placeholder">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Идёт распознавание — файлы появятся здесь.</p>
+          <p class="mono">транскрипт.txt · субтитры.srt · сводка.json</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+{{ task_init|json_script:"task-init" }}
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{% static 'core/js/task_detail.js' %}"></script>
+{% endblock %}

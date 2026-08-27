@@ -1,0 +1,79 @@
+{% load static %}<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Транскриб — панель управления{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'core/css/app.css' %}" />
+</head>
+<body data-csrf="{{ csrf_token }}">
+
+  <!-- амбиентный фон: сетка + мягкие пятна света -->
+  <div class="bg-layer" aria-hidden="true"></div>
+  <div class="bg-noise" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="{% url 'dashboard' %}">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <path d="M3 12h2.2M6.6 8v8M10.2 4.5v15M13.8 7v10M17.4 9.5v5M21 12h.01" />
+        </svg>
+      </span>
+      <span class="brand-name">ТРАНСКРИБ</span>
+      <span class="brand-tag">django · docker</span>
+    </a>
+
+    <nav class="nav">
+      <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Обзор</a>
+      <a href="{% url 'upload' %}" class="{% if request.resolver_match.url_name == 'upload' %}active{% endif %}">Новая задача</a>
+      <a href="/admin/" target="_blank" rel="noopener">Админка</a>
+    </nav>
+
+    <div class="topbar-right">
+      {% if user.is_authenticated %}
+        <span class="user-chip" title="{{ user.username }}">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 19.2c1.4-3 4-4.4 7-4.4s5.6 1.4 7 4.4"/></svg>
+          {{ user.username }}
+        </span>
+        <form method="post" action="{% url 'logout' %}" class="inline-form">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-ghost btn-sm">Выйти</button>
+        </form>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="foot">
+    <span>Транскриб · локальный Docker</span>
+    <span class="mono">python scripts/1.py · psutil · sqlite</span>
+  </footer>
+
+  {% if messages %}
+    <div class="toasts" id="toasts">
+      {% for message in messages %}
+        <div class="toast toast-{{ message.tags|default:'info' }}">
+          <span class="toast-dot"></span>
+          <p>{{ message }}</p>
+          <button class="toast-close" aria-label="Закрыть">×</button>
+        </div>
+      {% endfor %}
+    </div>
+    <script>
+      document.querySelectorAll(".toast").forEach(function (t) {
+        var close = function () { t.classList.add("out"); setTimeout(function () { t.remove(); }, 350); };
+        t.querySelector(".toast-close").addEventListener("click", close);
+        setTimeout(close, 5200);
+      });
+    </script>
+  {% endif %}
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
