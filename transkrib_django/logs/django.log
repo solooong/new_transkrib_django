@@ -22,3 +22,5 @@
 [2026-08-27 19:29:54,128] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
 [2026-08-27 19:32:56,300] INFO core.metrics: metrics collector started (interval=2.0s)
 [2026-08-27 19:32:56,307] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-08-27 19:35:37,636] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:35:37,643] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
