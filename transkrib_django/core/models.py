@@ -33,8 +33,16 @@ class Task(models.Model):
     duration_sec = models.FloatField("Длительность, сек", null=True, blank=True)
 
     language = models.CharField("Язык", max_length=32, default="Русский")
-    model = models.CharField("Модель", max_length=64, default="whisper-large-v3")
+    model = models.CharField("Модель", max_length=64, default="large-v3-turbo")
     diarization = models.BooleanField("Диаризация спикеров", default=True)
+    
+    # Новые поля для аргументов скрипта
+    diarization_method = models.CharField("Метод диаризации", max_length=32, default="spectral", 
+                                          choices=[("ecapa", "ecapa"), ("spectral", "spectral")])
+    timeout_sec = models.IntegerField("Таймаут (мс)", default=60000)
+    gpu_id = models.IntegerField("ID GPU", default=0)
+    metadata_json = models.TextField("Метаданные JSON", blank=True, default="")
+    output_path = models.CharField("Путь вывода", max_length=512, blank=True, default="")
 
     status = models.CharField("Статус", max_length=10, choices=Status.choices, default=Status.PENDING)
     progress = models.PositiveSmallIntegerField("Прогресс, %", default=0)
@@ -104,6 +112,10 @@ class Task(models.Model):
             "progress": self.progress,
             "created": self.created_at.strftime("%d.%m %H:%M"),
             "url": f"/task/{self.pk}/",
+            "diarization": self.diarization,
+            "diarization_method": self.diarization_method,
+            "timeout_sec": self.timeout_sec,
+            "gpu_id": self.gpu_id,
         }
 
 
