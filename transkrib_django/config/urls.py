@@ -14,6 +14,8 @@ urlpatterns = [
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("", include("core.urls")),
+    path("analytics/", include("analytics.urls")),
+    path("evaluation/", include("evaluation.urls")),
 ]
 
 # Медиа (загрузки и результаты) раздаёт сам Django — достаточно для локального Docker.

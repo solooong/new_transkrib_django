@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Новая оценка звонков</h1>
+    <p class="page-sub">Выберите источник и настройте параметры оценки</p>
+  </div>
+  <a href="{% url 'evaluation_dashboard' %}" class="btn btn-ghost">← Назад</a>
+</div>
+
+<form method="post" class="form-panel">
+  {% csrf_token %}
+  
+  <div class="form-group">
+    <label for="source">Источник *</label>
+    <select name="source" id="source" class="form-select" required>
+      <option value="">Выберите источник...</option>
+      {% for value, label in sources %}
+      <option value="{{ value }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-group">
+      <label for="date_from">Дата с</label>
+      <input type="date" name="date_from" id="date_from" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="date_to">Дата по</label>
+      <input type="date" name="date_to" id="date_to" class="form-control">
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="input_folder">Папка с аудио</label>
+    <input type="text" name="input_folder" id="input_folder" class="form-control" placeholder="Оставьте пустым для папки по умолчанию">
+  </div>
+  
+  <div class="form-group">
+    <label for="output_folder">Папка результатов</label>
+    <input type="text" name="output_folder" id="output_folder" class="form-control" placeholder="Оставьте пустым для папки по умолчанию">
+  </div>
+  
+  <div class="form-group form-check-group">
+    <label class="form-check-label">
+      <input type="checkbox" name="rebuild_excel_only" class="form-check">
+      Только сборка Excel из готовых оценок (--rebuild-excel)
+    </label>
+  </div>
+  
+  <div class="form-group form-check-group">
+    <label class="form-check-label">
+      <input type="checkbox" name="eval_only" class="form-check">
+      Только оценка транскрипций (--eval-only)
+    </label>
+  </div>
+  
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Запустить оценку</button>
+    <a href="{% url 'evaluation_dashboard' %}" class="btn btn-ghost">Отмена</a>
+  </div>
+</form>
+
+<p class="form-hint">
+  Скрипты оценки должны находиться в папке <code>scripts/</code>:<br>
+  <code>final_report_gazoil.py</code>, <code>final_report_eurooil.py</code>, <code>final_report_callcentre.py</code>
+</p>
+{% endblock %}

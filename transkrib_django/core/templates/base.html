@@ -29,6 +29,8 @@
     <nav class="nav">
       <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Обзор</a>
       <a href="{% url 'upload' %}" class="{% if request.resolver_match.url_name == 'upload' %}active{% endif %}">Новая задача</a>
+      <a href="{% url 'analytics_dashboard' %}" class="{% if 'analytics' in request.path %}active{% endif %}">Аналитика</a>
+      <a href="{% url 'evaluation_dashboard' %}" class="{% if 'evaluation' in request.path %}active{% endif %}">Оценка</a>
       <a href="/admin/" target="_blank" rel="noopener">Админка</a>
     </nav>
 

@@ -2,3 +2,13 @@
 [2026-08-27 18:54:39,491] WARNING core.metrics: metrics tick failed: no such table: core_task
 [2026-08-27 18:54:44,025] INFO core.metrics: metrics collector started (interval=2.0s)
 [2026-08-27 18:54:44,030] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 19:09:56,019] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:09:56,025] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 19:09:58,810] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:09:58,814] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 19:15:10,050] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:15:10,056] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 19:15:13,326] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:15:13,331] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 19:15:16,570] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:15:16,576] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
