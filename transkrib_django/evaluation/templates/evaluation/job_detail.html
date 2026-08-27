@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Задание оценки #{{ job.pk }}</h1>
+    <p class="page-sub">{{ job.get_source_display }} · {{ job.created_at|date:"d.m.Y H:i" }}</p>
+  </div>
+  <a href="{% url 'evaluation_dashboard' %}" class="btn btn-ghost">← Назад</a>
+</div>
+
+<section class="panel">
+  <header class="panel-head">
+    <h2>Статус выполнения</h2>
+  </header>
+  
+  <div class="status-block">
+    <span class="status-badge status-{{ job.status }}">{{ job.get_status_display }}</span>
+    <span class="progress-text">{{ job.progress }}%</span>
+  </div>
+  
+  <div class="progress-bar">
+    <div class="progress-fill" style="width: {{ job.progress }}%"></div>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-item">
+      <span class="stat-label">Всего файлов</span>
+      <span class="stat-value">{{ job.files_total }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Обработано</span>
+      <span class="stat-value ok">{{ job.files_processed }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Ошибок</span>
+      <span class="stat-value err">{{ job.files_failed }}</span>
+    </div>
+  </div>
+  
+  {% if job.error %}
+  <div class="error-block">
+    <strong>Ошибка:</strong>
+    <pre>{{ job.error }}</pre>
+  </div>
+  {% endif %}
+  
+  <div class="info-grid">
+    <div>
+      <strong>Период:</strong> 
+      {% if job.date_from %}{{ job.date_from }}{% else %}—{% endif %} — {% if job.date_to %}{{ job.date_to }}{% else %}—{% endif %}
+    </div>
+    <div><strong>Входная папка:</strong> {{ job.input_folder|default:job.default_input_folder }}</div>
+    <div><strong>Выходная папка:</strong> {{ job.output_folder|default:job.default_output_folder }}</div>
+    <div><strong>Скрипт:</strong> <code>{{ job.script_name|default:"не указан" }}</code></div>
+    <div><strong>Опции:</strong> 
+      {% if job.rebuild_excel_only %}Только Excel{% elif job.eval_only %}Только оценка{% else %}Полный цикл{% endif %}
+    </div>
+  </div>
+</section>
+
+{% if job.status == "pending" or job.status == "running" %}
+<form method="post" action="{% url 'evaluation_start_job' job.pk %}" class="form-actions">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-primary" {% if job.status == "running" %}disabled{% endif %}>
+    {% if job.status == "running" %}Выполняется...{% else %}Запустить{% endif %}
+  </button>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+const jobId = {{ job.pk }};
+
+// Polling для обновления статуса
+setInterval(() => {
+  fetch(`/evaluation/api/job/${jobId}/status/`)
+    .then(r => r.json())
+    .then(data => {
+      location.reload();
+    });
+}, 5000);
+</script>
+{% endblock %}
