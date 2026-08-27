@@ -1,0 +1,4 @@
+[2026-08-27 18:54:39,485] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 18:54:39,491] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 18:54:44,025] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 18:54:44,030] WARNING core.metrics: metrics tick failed: no such table: core_task

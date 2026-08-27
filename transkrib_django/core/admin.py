@@ -16,11 +16,18 @@ class TaskLogInline(admin.TabularInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("id", "display_name", "user", "status", "progress", "model", "created_at", "finished_at")
-    list_filter = ("status", "model", "language")
+    list_display = ("id", "display_name", "user", "status", "progress", "model", "diarization", "created_at", "finished_at")
+    list_filter = ("status", "model", "language", "diarization", "diarization_method")
     search_fields = ("original_name", "user__username")
     readonly_fields = ("created_at", "updated_at", "finished_at")
     inlines = (TaskLogInline,)
+    fieldsets = (
+        ("Файл", {"fields": ("input_file", "original_name", "size_bytes", "duration_sec")}),
+        ("Параметры транскрибации", {
+            "fields": ("language", "model", "diarization", "diarization_method", "timeout_sec", "gpu_id", "metadata_json", "output_path")
+        }),
+        ("Статус", {"fields": ("status", "progress", "error", "created_at", "updated_at", "finished_at")}),
+    )
 
 
 @admin.register(TaskLog)
