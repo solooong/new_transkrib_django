@@ -1,4 +1,11 @@
-"""Фоновый сборщик метрик системы (psutil) + опциональный GPU через pynvml."""
+"""Фоновый сборщик метрик системы (psutil) + опциональный GPU через pynvml.
+
+Сборщик:
+  * стартует один раз на процесс (см. apps.py);
+  * каждые METRICS_INTERVAL секунд пишет точку SystemMetric;
+  * история обрезается до METRICS_KEEP точек;
+  * NVML (NVIDIA) инициализируется один раз и переиспользуется.
+"""
 import logging
 import threading
 import time
@@ -11,23 +18,33 @@ logger = logging.getLogger("core.metrics")
 _started = False
 _lock = threading.Lock()
 
+# Кэш NVML: состояния "unknown" -> "on" / "off" (off — больше не пробуем).
+_nvml = {"state": "unknown", "handle": None}
+
 
 def _gpu_percent():
-    """Утилизация GPU, если установлен pynvml и доступна видеокарта NVIDIA."""
+    """Утилизация GPU 0-й видеокарты NVIDIA, None если GPU недоступен."""
+    if _nvml["state"] == "off":
+        return None
     try:
         import pynvml
 
-        pynvml.nvmlInit()
-        handle = pynvml.nvmlDeviceGetHandleByIndex(0)
-        util = pynvml.nvmlDeviceGetUtilizationRates(handle).gpu
-        pynvml.nvmlShutdown()
+        if _nvml["state"] == "unknown":
+            pynvml.nvmlInit()
+            _nvml["handle"] = pynvml.nvmlDeviceGetHandleByIndex(0)
+            _nvml["state"] = "on"
+            logger.info("pynvml: GPU обнаружен")
+        util = pynvml.nvmlDeviceGetUtilizationRates(_nvml["handle"]).gpu
         return float(util)
     except Exception:
+        if _nvml["state"] == "unknown":
+            logger.info("pynvml: GPU недоступен, метрика gpu отключена")
+        _nvml["state"] = "off"
         return None
 
 
 def collect() -> "SystemMetric":  # noqa: F821
-    """Снимок текущих метрик (экземпляр модели, не сохранён)."""
+    """Снимок текущих метрик (экземпляр модели, НЕ сохранён в БД)."""
     from .models import SystemMetric, Task
 
     vm = psutil.virtual_memory()
@@ -54,6 +71,13 @@ def collect() -> "SystemMetric":  # noqa: F821
     )
 
 
+def snapshot_and_save() -> "SystemMetric":  # noqa: F821
+    """Сделать один замер и сразу сохранить его. Используется и сборщиком, и self-test."""
+    point = collect()
+    point.save()
+    return point
+
+
 def _loop() -> None:
     """Цикл сборщика: замер -> запись в БД -> обрезка истории."""
     from django.db import connections
@@ -65,9 +89,9 @@ def _loop() -> None:
 
     while True:
         try:
-            snapshot = collect()
-            snapshot.save()
+            point = snapshot_and_save()
             SystemMetric.prune()
+            logger.debug("metrics: cpu=%.1f ram=%.1f gpu=%s", point.cpu, point.ram, point.gpu)
         except Exception as exc:  # pragma: no cover — сборщик должен жить вечно
             logger.warning("metrics tick failed: %s", exc)
         finally:
@@ -76,7 +100,7 @@ def _loop() -> None:
 
 
 def start_collector() -> None:
-    """Запускает единственный фоновый поток сборщика."""
+    """Запускает единственный фоновый поток сборщика (идемпотентно)."""
     global _started
     with _lock:
         if _started:

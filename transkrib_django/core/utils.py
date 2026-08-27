@@ -73,8 +73,7 @@ def build_command(task) -> list[str]:
     template = getattr(settings, "TRANSCRIBE_CMD", "")
     if template:
         return [part.format(input=inp, output=out) for part in shlex.split(template)]
-    script = os.path.join(settings.BASE_DIR, settings.TRANSCRIBE_SCRIPT)
-    return [sys.executable, script, "--input", inp, "--output", out]
+    return [sys.executable, settings.TRANSCRIBE_SCRIPT_PATH, "--input", inp, "--output", out]
 
 
 def get_duration_sec(path: str):
@@ -107,12 +106,15 @@ def run_transcription(task_id: int) -> None:
     cmd = build_command(task)
     add_log(task, "$ " + " ".join(shlex.quote(c) for c in cmd), "info")
 
-    script_path = os.path.join(settings.BASE_DIR, settings.TRANSCRIBE_SCRIPT)
+    script_path = settings.TRANSCRIBE_SCRIPT_PATH
     if not getattr(settings, "TRANSCRIBE_CMD", "") and not os.path.isfile(script_path):
         msg = (
-            f"Скрипт не найден: {settings.TRANSCRIBE_SCRIPT}. "
-            "Положите ваш файл 1.py в папку scripts/ (см. scripts/README.md) "
-            "или задайте TRANSCRIBE_CMD."
+            f"Скрипт не найден: {script_path} "
+            f"(каталог TRANSCRIBE_SCRIPT_DIR='{settings.TRANSCRIBE_SCRIPT_DIR}', "
+            f"файл TRANSCRIBE_SCRIPT_NAME='{settings.TRANSCRIBE_SCRIPT_NAME}'). "
+            f"Положите файл '{settings.TRANSCRIBE_SCRIPT_NAME}' в каталог "
+            f"'{settings.TRANSCRIBE_SCRIPT_DIR}/' (см. scripts/README.md) "
+            f"или задайте TRANSCRIBE_CMD."
         )
         add_log(task, msg, "err")
         task.status = Task.Status.ERROR
