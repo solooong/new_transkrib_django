@@ -142,6 +142,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024 * 1024
 # --- Сбор метрик ------------------------------------------------------------
 METRICS_INTERVAL = float(env("METRICS_INTERVAL", "2"))  # секунды между замерами
 METRICS_KEEP = int(env("METRICS_KEEP", "2160"))          # сколько точек хранить (~1.2 ч)
+HOST_PROC_PATH = env("HOST_PROC_PATH", "/host/proc")     # путь к /proc хоста для метрик
 
 # --- Логирование ------------------------------------------------------------
 LOG_DIR = BASE_DIR / "logs"

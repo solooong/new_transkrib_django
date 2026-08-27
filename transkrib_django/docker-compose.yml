@@ -16,6 +16,7 @@ services:
       # TRANSCRIBE_CMD: "python scripts/1.py {input} {output}"
       MAX_CONCURRENT_TASKS: "1"
       METRICS_INTERVAL: "2"
+      METRICS_KEEP: "2160"
     volumes:
       # Ваш скрипт транскрибации: положите файл 1.py в ./scripts на хосте —
       # он попадёт в контейнер как есть и НЕ изменяется проектом.
@@ -26,6 +27,10 @@ services:
       - ./logs:/app/logs
       # База SQLite (переживает пересоздание контейнера).
       - db_data:/app/data
+      # Доступ к /proc хоста для корректных метрик системы (опционально)
+      - /proc:/host/proc:ro
+    # Видит процессы хоста для точных метрик CPU/RAM (опционально)
+    # pid: host
 
 volumes:
   db_data:
