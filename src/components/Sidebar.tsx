@@ -105,6 +105,18 @@ export default function Sidebar({
         )}
       </div>
 
+      {/* подсказка: бэкенд */}
+      <div className="mt-5 hidden px-3 md:block">
+        <div className="rounded-lg border border-ink-700/60 bg-ink-900/60 px-3 py-2.5">
+          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-fog-500">бэкенд · django + docker</p>
+          <p className="mt-1 font-mono text-[10.5px] leading-relaxed text-fog-400">
+            <span className="text-acc">transkrib_django/</span>
+            <br />
+            <span className="text-fog-500">$</span> docker compose up --build
+          </p>
+        </div>
+      </div>
+
       {/* низ: статус + пользователь */}
       <div className="mt-auto border-t border-ink-700/60 p-3 md:p-4">
         <div className="mb-3 hidden items-center gap-2 rounded-lg bg-ink-850/70 px-3 py-2 md:flex">

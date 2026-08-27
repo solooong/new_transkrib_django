@@ -1,0 +1,10 @@
+{% if status == "running" %}
+  <span class="chip chip-running"><i class="chip-dot pulse"></i>Выполняется · {{ progress }}%</span>
+  <span class="progress"><span class="progress-fill stripes" style="width:{{ progress }}%"></span></span>
+{% elif status == "done" %}
+  <span class="chip chip-done"><i class="chip-dot"></i>Завершено</span>
+{% elif status == "error" %}
+  <span class="chip chip-error"><i class="chip-dot"></i>Ошибка</span>
+{% else %}
+  <span class="chip chip-pending"><i class="chip-dot"></i>В очереди</span>
+{% endif %}

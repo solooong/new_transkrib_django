@@ -1,0 +1,28 @@
+services:
+  web:
+    build: .
+    container_name: transkrib-web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_DEBUG: "1"
+      DJANGO_ALLOWED_HOSTS: "*"
+      # Внешний скрипт транскрибации (подключается volume-ом, проектом не изменяется).
+      TRANSCRIBE_SCRIPT: "scripts/1.py"
+      # Если у 1.py другой интерфейс аргументов, раскомментируйте и поправьте:
+      # TRANSCRIBE_CMD: "python scripts/1.py {input} {output}"
+      MAX_CONCURRENT_TASKS: "1"
+      METRICS_INTERVAL: "2"
+    volumes:
+      # Ваш скрипт 1.py — кладёте в ./scripts на хосте, он попадает в контейнер как есть.
+      - ./scripts:/app/scripts
+      # Загрузки и результаты транскрибации.
+      - ./media:/app/media
+      # Логи Django.
+      - ./logs:/app/logs
+      # База SQLite (переживает пересоздание контейнера).
+      - db_data:/app/data
+
+volumes:
+  db_data:

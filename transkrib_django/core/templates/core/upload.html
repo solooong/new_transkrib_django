@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Новая транскрибация · Транскриб{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Новая транскрибация</h1>
+    <p class="page-sub">файл уйдёт в очередь и обработается скриптом <span class="mono">scripts/1.py</span></p>
+  </div>
+  <a href="{% url 'dashboard' %}" class="btn btn-ghost">← На обзор</a>
+</div>
+
+<section class="panel upload-panel">
+  <form method="post" enctype="multipart/form-data" id="upload-form" class="upload-form">
+    {% csrf_token %}
+
+    <label class="dropzone" id="dropzone" for="{{ form.input_file.id_for_label }}">
+      <input type="file" name="{{ form.input_file.name }}" id="{{ form.input_file.id_for_label }}"
+             accept=".mp3,.wav,.m4a,.ogg,.flac,.aac,.opus,.mp4,.mkv,.webm,.mov" required />
+      <svg class="dz-icon" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <path d="M3 12h2.4M7 7.5v9M10.6 4.5v15M14.2 8v8M17.8 10v4M21 12h.01" />
+      </svg>
+      <p class="dz-title" id="dz-title">Перетащите аудио сюда <span>или кликните для выбора</span></p>
+      <p class="dz-sub mono" id="dz-sub">mp3 · wav · m4a · ogg · flac · mp4 — до 2 ГБ</p>
+      {% if form.input_file.errors %}<p class="field-error">{{ form.input_file.errors.0 }}</p>{% endif %}
+    </label>
+
+    <div class="form-grid">
+      <label class="field">
+        <span>{{ form.language.label }}</span>
+        {{ form.language }}
+      </label>
+      <label class="field">
+        <span>{{ form.model.label }}</span>
+        {{ form.model }}
+      </label>
+      <label class="field field-check">
+        {{ form.diarization }}
+        <span>
+          <b>{{ form.diarization.label }}</b>
+          <small>разметить реплики по говорящим</small>
+        </span>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <p class="mono form-note">запуск: python scripts/1.py --input … --output … · логи будут в журнале задачи</p>
+      <button type="submit" class="btn btn-primary btn-lg">
+        Поставить в очередь
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var dz = document.getElementById("dropzone");
+    var input = dz.querySelector("input[type=file]");
+    var title = document.getElementById("dz-title");
+    var sub = document.getElementById("dz-sub");
+
+    function fmtSize(bytes) {
+      var mb = bytes / 1048576;
+      return mb >= 1024 ? (mb / 1024).toFixed(2) + " ГБ" : mb.toFixed(1) + " МБ";
+    }
+    function showFile(f) {
+      dz.classList.add("has-file");
+      title.innerHTML = f.name;
+      sub.textContent = fmtSize(f.size) + " · готово к отправке";
+    }
+    input.addEventListener("change", function () {
+      if (input.files && input.files[0]) showFile(input.files[0]);
+    });
+    ["dragenter", "dragover"].forEach(function (ev) {
+      dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.add("drag"); });
+    });
+    ["dragleave", "drop"].forEach(function (ev) {
+      dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.remove("drag"); });
+    });
+    dz.addEventListener("drop", function (e) {
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        input.files = e.dataTransfer.files;
+        showFile(e.dataTransfer.files[0]);
+      }
+    });
+  })();
+</script>
+{% endblock %}
