@@ -7,14 +7,17 @@
 ## Быстрый старт
 
 ```bash
-# 1. Положите ваш скрипт распознавания в папку scripts как 1.py
+# 1. Настройте окружение (опционально — всё работает и со значениями по умолчанию)
+cp .env.example .env
+
+# 2. Положите ваш скрипт распознавания в папку scripts как 1.py
 cp /путь/к/вашему/скрипту.py scripts/1.py
 
-# 2. Соберите и запустите
+# 3. Соберите и запустите
 docker compose up --build
 
-# 3. Откройте http://localhost:8000
-#    Вход: admin / admin (создаётся автоматически при первом старте)
+# 4. Откройте http://localhost:8000 (порт меняется переменной TRANSCRIB_PORT в .env)
+#    Вход: admin / admin (или из ADMIN_USERNAME / ADMIN_PASSWORD в .env)
 ```
 
 ## Что внутри
@@ -42,6 +45,9 @@ docker compose up --build
 
 ## Переменные окружения
 
+Все переменные задаются в **`.env`** рядом с `docker-compose.yml` (шаблон — `.env.example`).
+Compose подставляет их с запасными значениями, поэтому проект работает и без файла.
+
 | Переменная | По умолчанию | Описание |
 | --- | --- | --- |
 | `TRANSCRIBE_SCRIPT_DIR` | `scripts` | Каталог, куда кладётся файл скрипта транскрибации |
@@ -49,8 +55,17 @@ docker compose up --build
 | `TRANSCRIBE_CMD` | — | Полная команда с `{input}`/`{output}`, если аргументы другие |
 | `MAX_CONCURRENT_TASKS` | `1` | Одновременные задачи |
 | `METRICS_INTERVAL` | `2` | Интервал сбора метрик, сек |
+| `METRICS_KEEP` | `2160` | Сколько точек истории метрик хранить |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `admin` | Учётка, создаваемая при первом старте |
+| `TRANSCRIB_PORT` | `8000` | Порт сервиса на хосте |
 | `DJANGO_DEBUG` | `1` | Режим отладки |
 | `DJANGO_SECRET_KEY` | dev-ключ | **Обязательно задайте в продакшене** |
+
+Генерация надёжного ключа:
+
+```bash
+python -c "from django.core.management import utils; print(utils.get_random_secret_key())"
+```
 
 ## Полезное
 

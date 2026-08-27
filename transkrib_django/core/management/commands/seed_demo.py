@@ -23,10 +23,12 @@ class Command(BaseCommand):
 
     # ------------------------------------------------------------------
     def _ensure_admin(self):
-        if User.objects.filter(username="admin").exists():
+        username = os.environ.get("ADMIN_USERNAME", "admin")
+        password = os.environ.get("ADMIN_PASSWORD", "admin")
+        if User.objects.filter(username=username).exists():
             return
-        User.objects.create_superuser("admin", "admin@transkrib.local", "admin")
-        self.stdout.write("создан пользователь admin/admin")
+        User.objects.create_superuser(username, f"{username}@transkrib.local", password)
+        self.stdout.write(f"создан пользователь {username}/{password}")
 
     def _ensure_metrics(self):
         from core.models import SystemMetric

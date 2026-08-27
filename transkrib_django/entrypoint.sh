@@ -24,7 +24,7 @@ python manage.py migrate --noinput
 echo "[entrypoint] статика..."
 python manage.py collectstatic --noinput
 
-echo "[entrypoint] демо-данные (admin/admin)..."
+echo "[entrypoint] демо-данные (пользователь из ADMIN_USERNAME/ADMIN_PASSWORD, по умолчанию admin/admin)..."
 python manage.py seed_demo
 
 echo "[entrypoint] запуск сервера на :8000"
