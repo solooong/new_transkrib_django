@@ -4,7 +4,9 @@ services:
     container_name: transkrib-web
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8008:8000"
+    env_file:
+      - .env
     environment:
       DJANGO_DEBUG: "1"
       DJANGO_ALLOWED_HOSTS: "*"
@@ -27,6 +29,8 @@ services:
       - ./logs:/app/logs
       # База SQLite (переживает пересоздание контейнера).
       - db_data:/app/data
+      # Данные для импорта и оценки звонков
+      - ./data:/app/data
       # Доступ к /proc хоста для корректных метрик системы (опционально)
       - /proc:/host/proc:ro
     # Видит процессы хоста для точных метрик CPU/RAM (опционально)
