@@ -1,5 +1,12 @@
-node_modules/
-.next/
-dist/
-build/
+```
+# Logs and temp files
 *.log
+
+# Database
+data/db.sqlite3
+
+# Environment
+.env
+.env.local
+*.env.*
+```

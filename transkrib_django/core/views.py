@@ -58,6 +58,10 @@ def upload_file(request):
             uploaded = request.FILES["input_file"]
             task.original_name = uploaded.name
             task.size_bytes = uploaded.size
+            
+            # Сохраняем output_path из формы
+            task.output_path = request.POST.get("output_path", "").strip()
+            
             task.save()
 
             task.duration_sec = get_duration_sec(task.input_file.path)

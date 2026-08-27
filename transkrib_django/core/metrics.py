@@ -7,6 +7,7 @@
   * NVML (NVIDIA) инициализируется один раз и переиспользуется.
 """
 import logging
+import os
 import threading
 import time
 
@@ -44,23 +45,48 @@ def _gpu_percent():
 
 
 def collect() -> "SystemMetric":  # noqa: F821
-    """Снимок текущих метрик (экземпляр модели, НЕ сохранён в БД)."""
+    """Снимок текущих метрик (экземпляр модели, НЕ сохранён в БД).
+    
+    Для работы внутри Docker с доступом к метрикам хоста:
+    - Если смонтирован /proc:/host/proc:ro, используем его для расчётов
+    - Иначе работаем с метриками самого контейнера
+    """
     from .models import SystemMetric, Task
 
-    vm = psutil.virtual_memory()
-    du = psutil.disk_usage("/")
-    net = psutil.net_io_counters()
-    try:
-        import os as _os
-
-        load1 = float(_os.getloadavg()[0])
-    except Exception:
-        load1 = 0.0
+    # Проверяем, есть ли доступ к /proc хоста
+    host_proc = getattr(settings, 'HOST_PROC_PATH', '/host/proc')
+    use_host = os.path.exists(host_proc) and os.path.isdir(host_proc)
+    
+    if use_host:
+        # Используем метрики хоста через смонтированный /proc
+        try:
+            # Для Linux: читаем load average из хоста
+            with open(f'{host_proc}/loadavg', 'r') as f:
+                load1 = float(f.read().split()[0])
+        except Exception:
+            load1 = 0.0
+            
+        # CPU считаем стандартным способом psutil
+        cpu_percent_val = psutil.cpu_percent(interval=None)
+        
+        vm = psutil.virtual_memory()
+        du = psutil.disk_usage("/")
+        net = psutil.net_io_counters()
+    else:
+        # Работаем с метриками контейнера (стандартное поведение)
+        vm = psutil.virtual_memory()
+        du = psutil.disk_usage("/")
+        net = psutil.net_io_counters()
+        try:
+            load1 = float(os.getloadavg()[0])
+        except Exception:
+            load1 = 0.0
+        cpu_percent_val = psutil.cpu_percent(interval=None)
 
     running = Task.objects.filter(status=Task.Status.RUNNING).count()
 
     return SystemMetric(
-        cpu=psutil.cpu_percent(interval=None),
+        cpu=cpu_percent_val,
         ram=vm.percent,
         disk=du.percent,
         gpu=_gpu_percent(),

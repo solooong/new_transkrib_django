@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Задание импорта #{{ job.pk }}</h1>
+    <p class="page-sub">{{ job.get_source_display }} · {{ job.created_at|date:"d.m.Y H:i" }}</p>
+  </div>
+  <a href="{% url 'analytics_dashboard' %}" class="btn btn-ghost">← Назад</a>
+</div>
+
+<section class="panel">
+  <header class="panel-head">
+    <h2>Статус выполнения</h2>
+  </header>
+  
+  <div class="status-block">
+    <span class="status-badge status-{{ job.status }}">{{ job.get_status_display }}</span>
+    <span class="progress-text">{{ job.progress }}%</span>
+  </div>
+  
+  <div class="progress-bar">
+    <div class="progress-fill" style="width: {{ job.progress }}%"></div>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-item">
+      <span class="stat-label">Найдено записей</span>
+      <span class="stat-value">{{ job.records_found }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Импортировано</span>
+      <span class="stat-value ok">{{ job.records_imported }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Пропущено</span>
+      <span class="stat-value warn">{{ job.records_skipped }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Ошибок</span>
+      <span class="stat-value err">{{ job.records_failed }}</span>
+    </div>
+  </div>
+  
+  {% if job.error %}
+  <div class="error-block">
+    <strong>Ошибка:</strong>
+    <pre>{{ job.error }}</pre>
+  </div>
+  {% endif %}
+  
+  <div class="info-grid">
+    <div>
+      <strong>Период:</strong> 
+      {% if job.date_from %}{{ job.date_from }}{% else %}—{% endif %} — {% if job.date_to %}{{ job.date_to }}{% else %}—{% endif %}
+    </div>
+    <div><strong>Телефон:</strong> {{ job.phone_filter|default:"—" }}</div>
+    <div><strong>Отдел:</strong> {{ job.department_filter|default:"—" }}</div>
+    <div><strong>Выходная папка:</strong> {{ job.output_folder|default:job.default_output_folder }}</div>
+    <div><strong>Скрипт:</strong> <code>{{ job.script_name|default:"не указан" }}</code></div>
+  </div>
+</section>
+
+{% if job.status == "pending" or job.status == "running" %}
+<form method="post" action="{% url 'analytics_start_job' job.pk %}" class="form-actions">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-primary" {% if job.status == "running" %}disabled{% endif %}>
+    {% if job.status == "running" %}Выполняется...{% else %}Запустить{% endif %}
+  </button>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+const jobId = {{ job.pk }};
+const jobInit = {{ job_init|safe }};
+
+// Polling для обновления статуса
+setInterval(() => {
+  fetch(`/analytics/api/job/${jobId}/status/`)
+    .then(r => r.json())
+    .then(data => {
+      location.reload(); // Простая перезагрузка для обновления
+    });
+}, 5000);
+</script>
+{% endblock %}

@@ -70,10 +70,35 @@ def build_command(task) -> list[str]:
     """Команда запуска внешнего скрипта для задачи."""
     inp = task.input_file.path
     out = task.result_folder()
+    
+    # Сохраняем output_path в задаче
+    if task.output_path:
+        out = task.output_path
+        os.makedirs(out, exist_ok=True)
+    
     template = getattr(settings, "TRANSCRIBE_CMD", "")
     if template:
         return [part.format(input=inp, output=out) for part in shlex.split(template)]
-    return [sys.executable, settings.TRANSCRIBE_SCRIPT_PATH, "--input", inp, "--output", out]
+    
+    # Строим команду с аргументами согласно спецификации
+    cmd = [sys.executable, settings.TRANSCRIBE_SCRIPT_PATH]
+    cmd.extend(["--input", inp])
+    cmd.extend(["--output", out])
+    cmd.extend(["--model", task.model])
+    
+    if task.diarization:
+        cmd.append("--diarize")
+        cmd.extend(["--method", task.diarization_method])
+    else:
+        cmd.append("--no-diarize")
+    
+    cmd.extend(["--timeout", str(task.timeout_sec)])
+    cmd.extend(["--gpu", str(task.gpu_id)])
+    
+    if task.metadata_json:
+        cmd.extend(["--metadata", task.metadata_json])
+    
+    return cmd
 
 
 def get_duration_sec(path: str):
