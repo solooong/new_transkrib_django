@@ -1,309 +1,78 @@
-# 📁 Расположение исполнительных скриптов проекта
+# 📁 Расположение скриптов проекта «Транскриб»
 
-Этот документ описывает расположение и назначение всех исполнительных `.py` скриптов в проекте.
+Все исполняемые скрипты должны находиться в папке **`/workspace/transkrib_django/scripts/`**.
 
-## Структура папки scripts/
-
-Все скрипты должны быть размещены в папке `scripts/` рядом с этим файлом:
-
-```
-scripts/
-├── 1.py                              # Скрипт транскрибации аудио
-├── import_from_ats_gazoil.py         # Импорт аудио из АТС ГазОйл
-├── import_from_ats_eurooil.py        # Импорт аудио из АТС Евроойл
-├── import_from_ats_callcentre.py     # Импорт аудио из АТС КоллЦентр
-├── final_report_gazoil.py            # Оценка звонков ГазОйл
-├── final_report_eurooil.py           # Оценка звонков Евроойл
-├── final_report_callcentre.py        # Оценка звонков КоллЦентр
-└── SCRIPTS_LOCATION.md               # Этот файл
-```
+Эта папка подключена к Docker-контейнеру как volume, поэтому вы можете редактировать скрипты на хосте без пересборки образа.
 
 ---
 
-## 1. Скрипт транскрибации
+## 🔹 Скрипты импорта аудио (Аналитика звонков)
 
-### Файл: `scripts/1.py`
+| Файл | Назначение | Аргументы CLI |
+|------|-----------|---------------|
+| `import_from_ats_gazoil.py` | Импорт записей из системы ГазОйл | `--date-from`, `--date-to`, `--phone`, `--department`, `--output`, `--skip-existing`, `--min-duration` |
+| `import_from_ats_eurooil.py` | Импорт записей из системы Евроойл | `--date-from`, `--date-to`, `--phone`, `--department`, `--output`, `--skip-existing`, `--min-duration` |
+| `import_from_ats_callcentre.py` | Импорт записей из системы КоллЦентр | `--date-from`, `--date-to`, `--phone`, `--department`, `--output`, `--skip-existing`, `--min-duration` |
 
-**Назначение:** Транскрибация аудиофайлов с использованием Whisper AI
-
-**Аргументы командной строки:**
-
-```bash
-python scripts/1.py <audio_path> [OPTIONS]
-
-Позиционные аргументы:
-  audio_path              Путь к аудиофайлу (WAV, MP3, M4A, AMR и др.)
-
-Опциональные аргументы:
-  --model                 Размер модели Whisper
-                          choices: tiny, base, small, medium, large, 
-                                   large-v2, large-v3, large-v3-turbo
-                          default: large-v3-turbo
-  
-  --diarize               Разделение по спикерам (по умолчанию включено)
-  --no-diarize            Отключить разделение по спикерам
-  
-  --method                Метод диаризации
-                          choices: ecapa, spectral
-                          default: spectral
-  
-  --output                Путь для сохранения результата
-  
-  --timeout               Таймаут транскрибации в секундах
-                          type: int
-                          default: 60000
-  
-  --gpu                   ID GPU для использования
-                          type: int
-                          default: 1
-  
-  --metadata              JSON строка с метаданными
-                          type: str
-```
-
-**Примеры использования:**
-
-```bash
-# Базовая транскрибация
-python scripts/1.py /path/to/audio.wav
-
-# С выбором модели и диаризацией
-python scripts/1.py /path/to/audio.wav --model large-v3 --diarize --method ecapa
-
-# С выводом в файл и таймаутом
-python scripts/1.py /path/to/audio.wav --output /path/to/result.json --timeout 120000
-
-# С использованием GPU и метаданными
-python scripts/1.py /path/to/audio.wav --gpu 0 --metadata '{"call_id": "12345", "agent": "Ivanov"}'
-```
-
-**Возвращаемые значения:**
-- `0` — успех
-- `1` — ошибки
-- `130` — прервано пользователем (Ctrl+C)
-
----
-
-## 2. Скрипты импорта аудио (Аналитика звонков)
-
-### Файл: `scripts/import_from_ats_gazoil.py`
-
-**Назначение:** Загрузка записей звонков из АТС системы ГазОйл
-
-**Раздел в интерфейсе:** Аналитика звонков → Импорт аудио ГазОйл
-
-**Ожидаемые аргументы (рекомендуется):**
+### Пример запуска:
 ```bash
 python scripts/import_from_ats_gazoil.py \
-    --date-from YYYY-MM-DD \
-    --date-to YYYY-MM-DD \
-    --phone +7XXXXXXXXXX \
-    --output /path/to/output/folder
+  --date-from 2024-01-01 \
+  --date-to 2024-01-31 \
+  --phone +79991234567 \
+  --output /app/data/output/gazoil \
+  --skip-existing \
+  --min-duration 10
 ```
 
----
-
-### Файл: `scripts/import_from_ats_eurooil.py`
-
-**Назначение:** Загрузка записей звонков из АТС системы Евроойл
-
-**Раздел в интерфейсе:** Аналитика звонков → Импорт аудио Евроойл
-
-**Ожидаемые аргументы (рекомендуется):**
-```bash
-python scripts/import_from_ats_eurooil.py \
-    --date-from YYYY-MM-DD \
-    --date-to YYYY-MM-DD \
-    --phone +7XXXXXXXXXX \
-    --output /path/to/output/folder
-```
-
----
-
-### Файл: `scripts/import_from_ats_callcentre.py`
-
-**Назначение:** Загрузка записей звонков из АТС системы КоллЦентр
-
-**Раздел в интерфейсе:** Аналитика звонков → Импорт аудио КоллЦентр
-
-**Ожидаемые аргументы (рекомендуется):**
-```bash
-python scripts/import_from_ats_callcentre.py \
-    --date-from YYYY-MM-DD \
-    --date-to YYYY-MM-DD \
-    --phone +7XXXXXXXXXX \
-    --output /path/to/output/folder
-```
-
----
-
-## 3. Скрипты оценки звонков
-
-### Файл: `scripts/final_report_gazoil.py`
-
-**Назначение:** Оценка качества звонков и формирование отчёта для ГазОйл
-
-**Раздел в интерфейсе:** Оценка звонков → ГазОйл
-
-**Аргументы командной строки:**
-```bash
-python scripts/final_report_gazoil.py [OPTIONS]
-
-Опциональные аргументы:
-  --rebuild-excel         Только сборка Excel из готовых оценок
-  --eval-only             Только оценка транскрипций
-```
-
-**Логика работы:**
-
-1. **Режим `--rebuild-excel`:**
-   - Собирает Excel-отчёт из уже существующих оценок
-   - Пропускает этап транскрибации
-   - Выход после завершения (exit 0)
-
-2. **Режим `--eval-only`:**
-   - Выполняет только оценку транскрипций
-   - Создаёт файл `transcription_report.xlsx`
-   - Выход после завершения (exit 0)
-
-3. **Полный режим (без флагов):**
-   - Проверка зависимостей
-   - Транскрибация аудиофайлов
-   - Оценка транскрипций
-   - Создание финального отчёта
-   - Сохранение прогресса и статистики
-
-**Примеры использования:**
-
-```bash
-# Только пересборка Excel
-python scripts/final_report_gazoil.py --rebuild-excel
-
-# Только оценка
-python scripts/final_report_gazoil.py --eval-only
-
-# Полный цикл
-python scripts/final_report_gazoil.py
-```
-
-**Структура выходных данных:**
-```
-output_folder/
-├── transcription_report.xlsx    # Финальный отчёт
-├── processing_summary.json      # Статистика обработки
-├── logs/                        # Логи выполнения
-└── transcriptions/              # Расшифровки файлов
-```
-
----
-
-### Файл: `scripts/final_report_eurooil.py`
-
-**Назначение:** Оценка качества звонков и формирование отчёта для Евроойл
-
-**Раздел в интерфейсе:** Оценка звонков → Евроойл
-
-**Аргументы и логика:** Аналогично `final_report_gazoil.py`
-
----
-
-### Файл: `scripts/final_report_callcentre.py`
-
-**Назначение:** Оценка качества звонков и формирование отчёта для КоллЦентр
-
-**Раздел в интерфейсе:** Оценка звонков → КоллЦентр
-
-**Аргументы и логика:** Аналогично `final_report_gazoil.py`
-
----
-
-## Интеграция с Django
-
-### Как Django запускает скрипты
-
-Django вызывает скрипты через `subprocess.Popen()` с соответствующими аргументами:
-
-```python
-import subprocess
-
-# Пример запуска скрипта импорта
-cmd = [
-    "python",
-    "scripts/import_from_ats_gazoil.py",
-    "--date-from", "2025-01-01",
-    "--date-to", "2025-01-31",
-    "--output", "/app/media/imports/gazoil/"
-]
-process = subprocess.Popen(
-    cmd,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
-    text=True
-)
-```
-
-### Мониторинг выполнения
-
-- Статус задания сохраняется в базе данных (модели `ImportJob`, `EvaluationJob`)
-- Логи пишутся в реальном времени
-- Пользователь видит прогресс через polling API
-
----
-
-## Требования к скриптам
-
-### Общие требования
-
-1. **Возврат кодов выхода:**
-   - `0` — успех
-   - `1` — ошибка
-   - `130` — прервано пользователем
-
-2. **Логирование:**
-   - Вывод в stdout/stderr
-   - Поддержка цветного вывода (опционально)
-
-3. **Обработка прерываний:**
-   ```python
-   try:
-       # основная логика
-   except KeyboardInterrupt:
-       print("\n⚠️  Interrupted by user")
-       exit(130)
-   ```
-
-4. **Зависимости:**
-   - Все зависимости должны быть указаны в `requirements.txt`
-   - Или установлены через `pip install`
-
-### Для скриптов оценки (`final_report_*.py`)
-
-Обязательная структура `main()`:
-
+### Логика main (шаблон):
 ```python
 def main() -> int:
     """Точка входа CLI приложения."""
-    if not check_dependencies():
+    print("\n📞 Megafon Cloud PBX Downloader v3.0.0\n")
+    
+    # 1. Загрузка переменных окружения
+    load_dotenv()
+    api_token = os.getenv("MEGAFON_API_TOKEN")
+    if not api_token:
+        logger.error("❌ Required env var MEGAFON_API_TOKEN not found in .env")
         return 1
     
-    db_manager = CallDbManager()
+    # 2. Инициализация компонентов
     try:
-        if "--rebuild-excel" in sys.argv:
-            output_folder = OUT_PUT_FOLDER
-            rebuild_excel_from_evaluations(output_folder)
-            return 0
-        
-        if "--eval-only" in sys.argv:
-            output_folder = OUT_PUT_FOLDER
-            excel_report = os.path.join(output_folder, "transcription_report.xlsx")
-            evaluate_transcriptions(output_folder, excel_report, db_manager)
-            return 0
-        
-        # Основной код...
-        return 0
+        api_client = MegafonPBXClient(token=api_token)
+        config_loader = ConfigLoader()
+        db_manager = CallDbManager() 
+        downloader = RecordingDownloader(api_client, config_loader, db_manager)        
+    except Exception as exc:
+        logger.exception(f"❌ Initialization failed: {exc}")
+        return 1
     
+    # 3. Получение диапазона дат от пользователя
+    try:
+        start = prompt_for_date("📅 Start date")
+        end = prompt_for_date("📅 End date")
+        
+        if start > end:
+            print("❌ Error: Start date must be before end date")
+            return 1
+    except KeyboardInterrupt:
+        print("\n⚠️  Cancelled by user")
+        return 130
+    
+    # 4. Запуск выгрузки
+    try:
+        stats = downloader.run(start, end)
+        summary = stats.to_summary()
+        # ... вывод статистики
+        return 0 if summary['failed'] == 0 else 1
+    except Exception as exc:
+        logger.exception("💥 Critical runtime error")
+        return 1
     finally:
-        db_manager.close()
+        if 'db_manager' in locals():
+            db_manager.close()
+
 
 if __name__ == "__main__":
     sys.exit(main())
@@ -311,80 +80,212 @@ if __name__ == "__main__":
 
 ---
 
-## Переменные окружения
+## 🔹 Скрипты оценки звонков
 
-Некоторые скрипты могут требовать переменные окружения:
+| Файл | Назначение | Аргументы CLI |
+|------|-----------|---------------|
+| `final_report_gazoil.py` | Оценка транскрипций для ГазОйл | `--rebuild-excel`, `--eval-only` |
+| `final_report_eurooil.py` | Оценка транскрипций для Евроойл | `--rebuild-excel`, `--eval-only` |
+| `final_report_callcentre.py` | Оценка транскрипций для КоллЦентр | `--rebuild-excel`, `--eval-only` |
 
+### Пример запуска:
 ```bash
-# Для скриптов импорта
-MEGAFON_API_TOKEN=your_token_here
+# Только сборка Excel из готовых оценок
+python scripts/final_report_gazoil.py --rebuild-excel
 
-# Для скриптов оценки
-RECORDS_FOLDER=/path/to/records
-OUT_PUT_FOLDER=/path/to/output
+# Только оценка транскрипций
+python scripts/final_report_gazoil.py --eval-only
+
+# Полный процесс (транскрибация + оценка)
+python scripts/final_report_gazoil.py
 ```
 
-Установите их в `.env` файле или `docker-compose.yml`.
+### Логика main (шаблон):
+```python
+if __name__ == "__main__":
+    if not check_dependencies():
+        exit(1)
+    
+    db_manager = CallDbManager()
+    try:  # ← ДОБАВИТЬ ЭТУ СТРОКУ
+        if "--rebuild-excel" in sys.argv:
+            # Только сборка Excel из готовых оценок
+            output_folder = OUT_PUT_FOLDER
+            rebuild_excel_from_evaluations(output_folder)
+            exit(0)  # ← ОБЯЗАТЕЛЬНО, иначе идёт дальше
+
+        if "--eval-only" in sys.argv:
+            # Только оценка транскрипций
+            output_folder = OUT_PUT_FOLDER
+            excel_report = os.path.join(output_folder, "transcription_report.xlsx")
+            print("🚀 Запуск ТОЛЬКО оценки транскрипций...")
+            evaluate_transcriptions(output_folder, excel_report, db_manager)
+            exit(0)
+        
+        # ... остальной код основного запуска
+        print("=== Система транскрибации и оценки аудио ===")
+        
+        # Получаем пути
+        input_folder = RECORDS_FOLDER.strip().strip('"')
+        output_folder = OUT_PUT_FOLDER.strip().strip('"')
+        
+        # Проверяем пути
+        if not os.path.exists(input_folder):
+            print("❌ Ошибка: папка с аудиофайлами не существует")
+            exit(1)
+        
+        # Создаем папку для результатов
+        os.makedirs(output_folder, exist_ok=True)
+        
+        # Транскрибация
+        processed_files, failed_files = transcribe_audio(input_folder, output_folder)
+        
+        if processed_files:
+            # Оценка и создание отчета
+            excel_report = os.path.join(output_folder, "transcription_report.xlsx")
+            evaluation_results = evaluate_transcriptions(output_folder, excel_report, db_manager)
+            
+            # Сохраняем финальный прогресс
+            save_progress_tracker(input_folder, output_folder, processed_files, failed_files)
+            
+            # Общая статистика
+            print("\n🎉 ПРОЦЕСС ЗАВЕРШЕН!")
+            print(f"📊 Обработано файлов: {len(processed_files)}")
+            
+    finally:  # ← ДОБАВИТЬ ЭТИ ДВЕ СТРОКИ
+        db_manager.close()  # ← ОБЯЗАТЕЛЬНО закрываем соединение
+```
 
 ---
 
-## Тестирование скриптов
+## 🔹 Скрипт транскрибации
 
-### Быстрый тест транскрибации
+| Файл | Назначение |
+|------|-----------|
+| `1.py` | Основной скрипт транскрибации аудио |
 
+### Аргументы CLI:
 ```bash
-cd /workspace/transkrib_django
-
-# Проверка наличия файла
-ls -la scripts/1.py
-
-# Тест с коротким аудио
-python scripts/1.py tests/sample.wav --model tiny --timeout 30000
+python scripts/1.py \
+  <audio_path> \
+  --model <tiny|base|small|medium|large|large-v2|large-v3|large-v3-turbo> \
+  [--diarize] [--no-diarize] \
+  [--method ecapa|spectral] \
+  [--output <path>] \
+  [--timeout <ms>] \
+  [--gpu <id>] \
+  [--metadata <json>]
 ```
 
-### Тест импорта
+### Подробное описание аргументов:
+| Аргумент | Тип | По умолчанию | Описание |
+|----------|-----|--------------|----------|
+| `audio_path` | positional | — | Путь к аудиофайлу (WAV, MP3, M4A, AMR и др.) |
+| `--model` | choice | `large-v3-turbo` | Размер модели Whisper |
+| `--diarize` | flag | `True` | Разделение по спикерам (включено по умолчанию) |
+| `--no-diarize` | flag | `False` | Отключить разделение по спикерам |
+| `--method` | choice | `spectral` | Метод диаризации (ecapa или spectral) |
+| `--output` | str | — | Путь для сохранения результата |
+| `--timeout` | int | `60000` | Таймаут транскрибации в миллисекундах |
+| `--gpu` | int | `0` | ID GPU для использования |
+| `--metadata` | str | — | JSON строка с метаданными |
+
+### Пример запуска:
+```bash
+python scripts/1.py \
+  /app/data/records/call_123.wav \
+  --model large-v3-turbo \
+  --diarize \
+  --method spectral \
+  --output /app/data/output/transcription_123.json \
+  --timeout 60000 \
+  --gpu 0 \
+  --metadata '{"call_id": "123", "agent": "Ivanov"}'
+```
+
+---
+
+## 📂 Структура папки scripts/
+
+```
+/workspace/transkrib_django/scripts/
+├── 1.py                              # Скрипт транскрибации
+├── import_from_ats_gazoil.py         # Импорт из ГазОйл
+├── import_from_ats_eurooil.py        # Импорт из Евроойл
+├── import_from_ats_callcentre.py     # Импорт из КоллЦентр
+├── final_report_gazoil.py            # Оценка ГазОйл
+├── final_report_eurooil.py           # Оценка Евроойл
+├── final_report_callcentre.py        # Оценка КоллЦентр
+└── SCRIPTS_LOCATION.md               # Этот файл
+```
+
+---
+
+## 🔧 Интеграция с Django
+
+Django автоматически находит и запускает эти скрипты через `subprocess.Popen`:
+
+1. **Аналитика звонков** (`/analytics/`):
+   - Выбираете источник (ГазОйл/Евроойл/КоллЦентр)
+   - Указываете даты, фильтры, путь вывода
+   - Django запускает соответствующий `import_from_ats_*.py`
+
+2. **Оценка звонков** (`/evaluation/`):
+   - Выбираете источник (ГазОйл/Евроойл/КоллЦентр)
+   - Опции: только Excel, только оценка, полный процесс
+   - Django запускает соответствующий `final_report_*.py`
+
+3. **Загрузка файла** (`/upload/`):
+   - Загружаете аудиофайл через форму
+   - Указываете параметры транскрибации
+   - Django запускает `scripts/1.py` с указанными аргументами
+
+---
+
+## ⚙️ Переменные окружения
+
+Некоторые скрипты используют переменные окружения из `.env`:
+
+```bash
+# МегаФон API
+MEGAFON_API_TOKEN=your_token_here
+
+# Пути к данным
+RECORDS_FOLDER=/app/data/records
+OUT_PUT_FOLDER=/app/data/output
+
+# Настройки транскрибации по умолчанию
+DEFAULT_WHISPER_MODEL=large-v3-turbo
+DEFAULT_DIARIZE=1
+DEFAULT_DIARIZATION_METHOD=spectral
+DEFAULT_TIMEOUT_MS=60000
+DEFAULT_GPU_ID=0
+```
+
+---
+
+## 🧪 Тестирование
+
+После добавления скриптов проверьте их работу:
 
 ```bash
 # Проверка синтаксиса
+python -m py_compile scripts/1.py
 python -m py_compile scripts/import_from_ats_gazoil.py
-
-# Запуск с help
-python scripts/import_from_ats_gazoil.py --help
-```
-
-### Тест оценки
-
-```bash
-# Проверка синтаксиса
 python -m py_compile scripts/final_report_gazoil.py
 
-# Запуск с help
+# Запуск с --help (если реализовано)
+python scripts/1.py --help
+python scripts/import_from_ats_gazoil.py --help
 python scripts/final_report_gazoil.py --help
 ```
 
 ---
 
-## Обновление скриптов
+## 📝 Примечания
 
-Если вы обновили скрипт:
-
-1. Положите новую версию в `scripts/`
-2. Перезапустите контейнер:
-   ```bash
-   docker compose restart web
-   ```
-3. Проверьте логи:
-   ```bash
-   docker compose logs -f web
-   ```
-
----
-
-## Контакты и поддержка
-
-При возникновении проблем со скриптами:
-
-1. Проверьте логи Django: `/workspace/transkrib_django/logs/`
-2. Проверьте права доступа к файлам
-3. Убедитесь, что все зависимости установлены
-4. Проверьте переменные окружения
+1. Все скрипты должны быть исполняемыми и иметь корректный shebang: `#!/usr/bin/env python3`
+2. Скрипты должны возвращать код выхода: `0` — успех, `1` — ошибка, `130` — прервано
+3. Обязательно закрывайте соединения с БД в блоке `finally`
+4. Логируйте все ошибки через `logger.exception()`
+5. Поддерживайте интерактивный режим (опрос пользователя) и CLI-режим (аргументы)

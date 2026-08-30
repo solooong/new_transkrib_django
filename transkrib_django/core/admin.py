@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import SystemMetric, Task, TaskLog
+from .models import Task, TaskLog
 
 
 class TaskLogInline(admin.TabularInline):
@@ -16,9 +16,9 @@ class TaskLogInline(admin.TabularInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("id", "display_name", "user", "status", "progress", "model", "diarization", "created_at", "finished_at")
-    list_filter = ("status", "model", "language", "diarization", "diarization_method")
-    search_fields = ("original_name", "user__username")
+    list_display = ("id", "display_name", "user", "status", "progress", "model", "words", "created_at", "finished_at")
+    list_filter = ("status", "model", "language")
+    search_fields = ("original_name", "user__username", "transcript_text")
     readonly_fields = ("created_at", "updated_at", "finished_at")
     inlines = (TaskLogInline,)
     fieldsets = (
@@ -38,9 +38,3 @@ class TaskLogAdmin(admin.ModelAdmin):
     @admin.display(description="Текст")
     def short_text(self, obj):
         return obj.text[:80]
-
-
-@admin.register(SystemMetric)
-class SystemMetricAdmin(admin.ModelAdmin):
-    list_display = ("id", "created_at", "cpu", "ram", "gpu", "disk", "running")
-    list_filter = ("created_at",)

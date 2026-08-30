@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { EventItem, SystemMetrics, Task, ToastItem, ViewId } from "./types";
+import type { EventItem, Task, ToastItem, ViewId } from "./types";
 import {
   bootLog,
   buildSrt,
@@ -18,7 +18,7 @@ import {
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
 import StatsBand from "./components/StatsBand";
-import SystemMonitor from "./components/SystemMonitor";
+import RunnerPanel from "./components/RunnerPanel";
 import TasksTable from "./components/TasksTable";
 import TaskDrawer from "./components/TaskDrawer";
 import NewTaskModal, { type NewTaskPayload } from "./components/NewTaskModal";
@@ -161,20 +161,6 @@ function engineTick(tasks: Task[]): {
   return { next, events, toasts };
 }
 
-function seedMetrics(running: number): SystemMetrics {
-  const cpu: number[] = [];
-  const ram: number[] = [];
-  let c = 22;
-  let r = 47;
-  for (let i = 0; i < 32; i++) {
-    c = Math.max(6, Math.min(92, c + (Math.random() - 0.5) * 9 + running * 0.6));
-    r = Math.max(30, Math.min(90, r + (Math.random() - 0.5) * 3));
-    cpu.push(c);
-    ram.push(r);
-  }
-  return { cpu, ram, disk: 61.4, gpu: running > 0 ? 92 : 7, load: 0.8 + running * 1.4 };
-}
-
 /* ================= приложение ================= */
 
 export default function App() {
@@ -195,7 +181,6 @@ export default function App() {
       { id: 5, t: now - 660 * 60000, kind: "done", text: "«подкаст_ep47_монтаж.mp3» распознан · 8 114 слов" },
     ];
   });
-  const [metrics, setMetrics] = useState<SystemMetrics>(() => seedMetrics(1));
 
   const tasksRef = useRef(tasks);
   useEffect(() => {
@@ -219,29 +204,6 @@ export default function App() {
     }, 1100);
     return () => clearInterval(id);
   }, [pushToast]);
-
-  /* метрики системы */
-  useEffect(() => {
-    const id = setInterval(() => {
-      setMetrics((m) => {
-        const running = tasksRef.current.filter((t) => t.status === "running").length;
-        const lastC = m.cpu[m.cpu.length - 1] ?? 20;
-        const lastR = m.ram[m.ram.length - 1] ?? 46;
-        const cpuTarget = 15 + running * 27;
-        const ramTarget = 43 + running * 14;
-        const cpu = Math.max(4, Math.min(97, lastC + (cpuTarget - lastC) * 0.22 + (Math.random() - 0.5) * 11));
-        const ram = Math.max(24, Math.min(94, lastR + (ramTarget - lastR) * 0.15 + (Math.random() - 0.5) * 4));
-        return {
-          cpu: [...m.cpu.slice(-39), cpu],
-          ram: [...m.ram.slice(-39), ram],
-          disk: Math.min(89, m.disk + 0.008 + running * 0.03),
-          gpu: running > 0 ? 86 + Math.random() * 12 : 5 + Math.random() * 9,
-          load: Math.max(0.2, Math.min(8, 0.55 + running * 1.7 + (Math.random() - 0.5) * 0.5)),
-        };
-      });
-    }, 2000);
-    return () => clearInterval(id);
-  }, []);
 
   /* действия */
   const createTask = (p: NewTaskPayload) => {
@@ -353,7 +315,7 @@ export default function App() {
 
               <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
                 <Reveal delay={80} className="min-w-0">
-                  <SystemMonitor metrics={metrics} tasks={tasks} />
+                  <RunnerPanel tasks={tasks} />
                 </Reveal>
                 <Reveal delay={160} className="min-w-0">
                   <EventFeed events={events} />

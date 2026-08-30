@@ -1,8 +1,9 @@
 """
-Настройки проекта «Транскриб».
+Настройки проекта «Транскриб» (версия 2).
 
-Все чувствительные параметры читаются из переменных окружения —
-их удобно задавать в docker-compose.yml.
+Архитектура: Django (интерфейс и хранение) + Flask-runner (исполнение скрипта)
+в одном контейнере. Мониторинг системы удалён — только транскрибация.
+Все чувствительные параметры читаются из переменных окружения (.env).
 """
 import os
 from pathlib import Path
@@ -23,11 +24,9 @@ SECRET_KEY = env(
     "django-insecure-transkrib-local-dev-key-change-me-in-production",
 )
 
-# Локальный Docker — по умолчанию DEBUG включён. Для продакшена: DJANGO_DEBUG=0
 DEBUG = env_bool("DJANGO_DEBUG", True)
 
 ALLOWED_HOSTS = [h.strip() for h in env("DJANGO_ALLOWED_HOSTS", "*").split(",") if h.strip()]
-
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in env("DJANGO_CSRF_ORIGINS", "").split(",") if o.strip()]
 
 INSTALLED_APPS = [
@@ -73,15 +72,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# SQLite хранится в /app/data — этот каталог монтируется как volume,
-# поэтому база переживает пересоздание контейнера.
-DATA_DIR = BASE_DIR / "data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": DATA_DIR / "db.sqlite3",
+        "NAME": BASE_DIR / "data" / "db.sqlite3",
     }
 }
 
@@ -100,12 +94,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-    },
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
 
 MEDIA_URL = "/media/"
@@ -120,32 +109,32 @@ LOGOUT_REDIRECT_URL = "/login/"
 
 # --- Транскрибация ----------------------------------------------------------
 # Каталог, в который кладётся файл скрипта транскрибации (по умолчанию scripts/).
-# Внутри контейнера подключается volume-ом ./scripts:/app/scripts, поэтому
-# файл можно менять на хосте без пересборки образа. Проект его НЕ модифицирует.
+# Подключается volume-ом ./scripts:/app/scripts — файл можно менять без пересборки.
 TRANSCRIBE_SCRIPT_DIR = env("TRANSCRIBE_SCRIPT_DIR", "scripts")
 
 # Имя файла скрипта внутри каталога TRANSCRIBE_SCRIPT_DIR.
 TRANSCRIBE_SCRIPT_NAME = env("TRANSCRIBE_SCRIPT_NAME", "1.py")
 
-# Полный путь к скрипту (вычисляемый).
+# Полный путь к скрипту (передаётся runner-у).
 TRANSCRIBE_SCRIPT_PATH = os.path.join(BASE_DIR, TRANSCRIBE_SCRIPT_DIR, TRANSCRIBE_SCRIPT_NAME)
 
-# Если у вашего скрипта другой интерфейс аргументов, задайте команду целиком,
-# например: TRANSCRIBE_CMD="python scripts/1.py {input} {output}"
-# Плейсхолдеры {input} и {output} будут подставлены автоматически.
-TRANSCRIBE_CMD = env("TRANSCRIBE_CMD", "")
-
-# Сколько задач может выполняться одновременно (ограничено GPU/CPU).
+# Сколько задач runner может выполнять одновременно.
 MAX_CONCURRENT_TASKS = int(env("MAX_CONCURRENT_TASKS", "1"))
+
+# --- Flask-runner -----------------------------------------------------------
+# Адрес runner-а (тот же контейнер, запускается entrypoint'ом).
+RUNNER_PORT = env("RUNNER_PORT", "8800")
+RUNNER_URL = env("RUNNER_URL", f"http://127.0.0.1:{RUNNER_PORT}")
+
+# Внутренний адрес Django, куда runner шлёт callback-и (лог/прогресс/результат).
+DJANGO_INTERNAL_BASE = env("DJANGO_INTERNAL_BASE", "http://127.0.0.1:8000")
+
+# Общий секрет для защиты callback-API (runner -> Django).
+RUNNER_SECRET = env("RUNNER_SECRET", "dev-runner-secret-change-me")
 
 # Максимальный размер загружаемого файла — 2 ГБ.
 FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024 * 1024
-
-# --- Сбор метрик ------------------------------------------------------------
-METRICS_INTERVAL = float(env("METRICS_INTERVAL", "2"))  # секунды между замерами
-METRICS_KEEP = int(env("METRICS_KEEP", "2160"))          # сколько точек хранить (~1.2 ч)
-HOST_PROC_PATH = env("HOST_PROC_PATH", "/host/proc")     # путь к /proc хоста для метрик
 
 # --- Логирование ------------------------------------------------------------
 LOG_DIR = BASE_DIR / "logs"
@@ -155,10 +144,7 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": "[{asctime}] {levelname} {name}: {message}",
-            "style": "{",
-        },
+        "verbose": {"format": "[{asctime}] {levelname} {name}: {message}", "style": "{"},
     },
     "handlers": {
         "console": {"class": "logging.StreamHandler", "formatter": "verbose"},

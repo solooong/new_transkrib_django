@@ -4,8 +4,8 @@
 {% block content %}
 <div class="page-head">
   <div>
-    <h1 class="page-title">Обзор</h1>
-    <p class="page-sub">состояние сервиса и системы в реальном времени</p>
+    <h1 class="page-title">Транскрибации</h1>
+    <p class="page-sub">ваши записи, обработанные скриптом <span class="mono">scripts/1.py</span></p>
   </div>
   <a href="{% url 'upload' %}" class="btn btn-primary">
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
@@ -13,90 +13,23 @@
   </a>
 </div>
 
-<!-- KPI -->
+<!-- KPI транскрибации -->
 <section class="kpis" aria-label="Показатели">
   <div class="kpi">
     <p class="kpi-num" id="kpi-total">{{ kpis.total }}</p>
-    <p class="kpi-label">всего задач</p>
+    <p class="kpi-label">всего транскрибаций</p>
   </div>
   <div class="kpi">
     <p class="kpi-num ok" id="kpi-done">{{ kpis.done }}</p>
     <p class="kpi-label">завершено</p>
   </div>
   <div class="kpi">
-    <p class="kpi-num warn" id="kpi-active">{{ kpis.running|add:kpis.pending }}</p>
+    <p class="kpi-num warn" id="kpi-active">{{ kpis.active }}</p>
     <p class="kpi-label">в работе и очереди</p>
   </div>
   <div class="kpi">
     <p class="kpi-num acc" id="kpi-minutes">{{ kpis.minutes }}</p>
     <p class="kpi-label">минут расшифровано</p>
-  </div>
-</section>
-
-<!-- система -->
-<section class="grid-system">
-  <div class="panel gauges-panel">
-    <header class="panel-head">
-      <h2>Система</h2>
-      <span class="live-badge"><span class="live-dot"></span>live · 2 c</span>
-    </header>
-    <div class="gauges">
-      <div class="gauge" id="g-cpu">
-        <canvas width="150" height="84"></canvas>
-        <p class="gauge-num">—</p>
-        <p class="gauge-label">CPU</p>
-      </div>
-      <div class="gauge" id="g-ram">
-        <canvas width="150" height="84"></canvas>
-        <p class="gauge-num">—</p>
-        <p class="gauge-label">Память</p>
-      </div>
-      <div class="gauge" id="g-gpu">
-        <canvas width="150" height="84"></canvas>
-        <p class="gauge-num">—</p>
-        <p class="gauge-label">GPU</p>
-      </div>
-      <div class="gauge" id="g-disk">
-        <canvas width="150" height="84"></canvas>
-        <p class="gauge-num">—</p>
-        <p class="gauge-label">Диск</p>
-      </div>
-    </div>
-    <div class="sys-foot mono" id="sys-foot">load — · активных задач: —</div>
-  </div>
-
-  <div class="panel chart-panel">
-    <header class="panel-head">
-      <h2>Нагрузка · последние ~6 минут</h2>
-      <div class="legend">
-        <span class="legend-item"><i style="background:#2cd9c8"></i>CPU</span>
-        <span class="legend-item"><i style="background:#6b93f0"></i>RAM</span>
-        <span class="legend-item"><i style="background:#f2a33c"></i>GPU</span>
-      </div>
-    </header>
-    <div class="chart-box">
-      <canvas id="metrics-chart"></canvas>
-    </div>
-  </div>
-</section>
-
-<!-- пайплайн -->
-<section class="panel pipeline-panel" aria-label="Пайплайн задач">
-  <div class="pipeline-head">
-    <h2>Пайплайн задач</h2>
-    <span class="mono" id="pipeline-total">всего {{ kpis.total }}</span>
-  </div>
-  <div class="pipeline-bar" id="pipeline-bar">
-    <span class="seg seg-running" data-status="running" style="width:0%"></span>
-    <span class="seg seg-done" data-status="done" style="width:0%"></span>
-    <span class="seg seg-pending" data-status="pending" style="width:0%"></span>
-    <span class="seg seg-error" data-status="error" style="width:0%"></span>
-  </div>
-  <div class="pipeline-legend" id="pipeline-legend">
-    <span><i class="dot dot-running"></i>Выполняется <b>0</b></span>
-    <span><i class="dot dot-done"></i>Завершено <b>0</b></span>
-    <span><i class="dot dot-pending"></i>В очереди <b>0</b></span>
-    <span><i class="dot dot-error"></i>Ошибка <b>0</b></span>
   </div>
 </section>
 
@@ -140,7 +73,7 @@
         {% empty %}
         <tr id="tasks-empty">
           <td colspan="7" class="empty-cell">
-            Пока нет ни одной задачи — <a href="{% url 'upload' %}">загрузите первый файл</a>.
+            Пока нет ни одной транскрибации — <a href="{% url 'upload' %}">загрузите первый файл</a>.
           </td>
         </tr>
         {% endfor %}
@@ -148,8 +81,6 @@
     </table>
   </div>
 </section>
-
-{{ initial_json|json_script:"metrics-init" }}
 {% endblock %}
 
 {% block scripts %}
