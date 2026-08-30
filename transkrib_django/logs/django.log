@@ -1,0 +1,37 @@
+[2026-08-27 18:54:39,485] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 18:54:39,491] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 18:54:44,025] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 18:54:44,030] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 19:09:56,019] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:09:56,025] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 19:09:58,810] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:09:58,814] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 19:15:10,050] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:15:10,056] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 19:15:13,326] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:15:13,331] WARNING core.metrics: metrics tick failed: no such table: core_task
+[2026-08-27 19:15:16,570] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:15:16,576] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-08-27 19:29:09,168] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:29:09,169] WARNING core.metrics: metrics tick failed: name 'os' is not defined
+[2026-08-27 19:29:22,532] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:29:22,534] WARNING core.metrics: metrics tick failed: cannot access local variable 'psutil' where it is not associated with a value
+[2026-08-27 19:29:50,512] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:29:50,518] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-08-27 19:29:54,121] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:29:54,128] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-08-27 19:32:56,300] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:32:56,307] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-08-27 19:35:37,636] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:35:37,643] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-08-27 19:37:11,348] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:37:11,356] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-08-27 19:37:55,923] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:37:55,930] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-08-27 19:37:59,829] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:37:59,836] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-08-27 19:41:54,114] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:42:12,804] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:42:12,812] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-08-27 19:42:52,188] INFO core.metrics: metrics collector started (interval=2.0s)
+[2026-08-27 19:42:52,197] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена

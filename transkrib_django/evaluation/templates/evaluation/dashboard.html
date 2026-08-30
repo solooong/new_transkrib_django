@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Оценка звонков</h1>
+    <p class="page-sub">Оценка транскрипций и формирование отчётов</p>
+  </div>
+  <a href="{% url 'evaluation_create' %}" class="btn btn-primary">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
+    Новая оценка
+  </a>
+</div>
+
+<!-- Задания оценки -->
+<section class="panel tasks-panel" aria-label="Задания оценки">
+  <header class="panel-head">
+    <h2>Задания оценки</h2>
+    <span class="mono hint">обновляется автоматически</span>
+  </header>
+  <div class="table-wrap">
+    <table class="tasks-table">
+      <thead>
+        <tr>
+          <th class="col-id">#</th>
+          <th>Источник</th>
+          <th class="col-status">Статус</th>
+          <th class="col-dur">Прогресс</th>
+          <th class="col-date">Создано</th>
+          <th class="col-act"></th>
+        </tr>
+      </thead>
+      <tbody id="jobs-body">
+        {% for job in jobs %}
+        <tr data-id="{{ job.pk }}">
+          <td class="mono col-id">{{ job.pk }}</td>
+          <td>{{ job.get_source_display }}</td>
+          <td class="col-status" data-cell="status">
+            <span class="status-badge status-{{ job.status }}">{{ job.get_status_display }}</span>
+          </td>
+          <td class="mono col-dur">{{ job.progress }}%</td>
+          <td class="mono col-date">{{ job.created_at|date:"d.m H:i" }}</td>
+          <td class="col-act"><a class="btn btn-ghost btn-sm" href="{% url 'evaluation_job_detail' job.pk %}">Открыть</a></td>
+        </tr>
+        {% empty %}
+        <tr id="jobs-empty">
+          <td colspan="6" class="empty-cell">
+            Пока нет заданий оценки — <a href="{% url 'evaluation_create' %}">создайте первое задание</a>.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

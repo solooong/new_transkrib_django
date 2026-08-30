@@ -21,6 +21,13 @@ class TaskAdmin(admin.ModelAdmin):
     search_fields = ("original_name", "user__username", "transcript_text")
     readonly_fields = ("created_at", "updated_at", "finished_at")
     inlines = (TaskLogInline,)
+    fieldsets = (
+        ("Файл", {"fields": ("input_file", "original_name", "size_bytes", "duration_sec")}),
+        ("Параметры транскрибации", {
+            "fields": ("language", "model", "diarization", "diarization_method", "timeout_sec", "gpu_id", "metadata_json", "output_path")
+        }),
+        ("Статус", {"fields": ("status", "progress", "error", "created_at", "updated_at", "finished_at")}),
+    )
 
 
 @admin.register(TaskLog)

@@ -43,10 +43,30 @@
           <small>разметить реплики по говорящим</small>
         </span>
       </label>
+      <label class="field">
+        <span>{{ form.diarization_method.label }}</span>
+        {{ form.diarization_method }}
+      </label>
+      <label class="field">
+        <span>{{ form.timeout_sec.label }}</span>
+        {{ form.timeout_sec }}
+      </label>
+      <label class="field">
+        <span>{{ form.gpu_id.label }}</span>
+        {{ form.gpu_id }}
+      </label>
+      <label class="field">
+        <span>{{ form.metadata_json.label }}</span>
+        {{ form.metadata_json }}
+      </label>
+      <label class="field">
+        <span>Путь вывода (опционально)</span>
+        <input type="text" name="output_path" class="form-control" placeholder="/path/to/output" />
+      </label>
     </div>
 
     <div class="form-actions">
-      <p class="mono form-note">запуск: python scripts/1.py --input … --output … · логи будут в журнале задачи</p>
+      <p class="mono form-note">запуск: python scripts/1.py --input … --output … --model … [--diarize] [--method …] [--timeout …] [--gpu …] · логи будут в журнале задачи</p>
       <button type="submit" class="btn btn-primary btn-lg">
         Поставить в очередь
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14M13 6l6 6-6 6"/></svg>
