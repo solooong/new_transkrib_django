@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="page-head">
-  <a href="{% url 'dashboard' %}" class="btn btn-ghost">← На обзор</a>
+  <a href="{% url 'dashboard' %}" class="btn btn-ghost">← К транскрибациям</a>
   <div class="page-head-actions">
     {% if task.status == "error" or task.status == "done" %}
     <form method="post" action="{% url 'retry_task' task.pk %}" class="inline-form">
@@ -52,6 +52,35 @@
   {% endif %}
 </section>
 
+<!-- транскрипт -->
+<section class="panel transcript-panel">
+  <header class="panel-head">
+    <h2>Транскрипт</h2>
+    {% if task.has_transcript %}
+      <a class="btn btn-primary btn-sm" href="{% url 'download_txt' task.pk %}">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M6 10l6 6 6-6M4 20h16"/></svg>
+        Скачать .txt
+      </a>
+    {% else %}
+      <span class="mono hint" id="transcript-hint">{{ task.words|default:"—" }} слов</span>
+    {% endif %}
+  </header>
+
+  <div id="transcript-body">
+    {% if task.has_transcript %}
+      <pre class="transcript-text">{{ task.transcript_text }}</pre>
+      <p class="mono transcript-meta">{{ task.words|default:"—" }} слов ·
+        {% if task.finished_at %}готово {{ task.finished_at|date:"H:i:s" }}{% endif %}</p>
+    {% else %}
+      <div class="results-placeholder">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Транскрипт появится здесь, когда runner завершит обработку.</p>
+        <p class="mono">результат можно будет скачать в .txt</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
 <div class="detail-grid">
   <!-- журнал -->
   <section class="panel log-panel">
@@ -63,20 +92,20 @@
       {% for line in logs %}
       <div class="log-line lvl-{{ line.level }}"><span class="log-t">{{ line.created_at|date:"H:i:s" }}</span>{{ line.text }}</div>
       {% empty %}
-      <div class="log-line lvl-info"><span class="log-t">--:--:--</span>Ожидание первых строк вывода…</div>
+      <div class="log-line lvl-info"><span class="log-t">--:--:--</span>Ожидание первых строк от runner'а…</div>
       {% endfor %}
     </div>
   </section>
 
-  <!-- результаты -->
+  <!-- файлы результатов -->
   <section class="panel results-panel">
     <header class="panel-head">
-      <h2>Результаты</h2>
+      <h2>Файлы результатов</h2>
       <span class="mono hint">media/results/task_{{ task.pk }}/</span>
     </header>
 
     <div id="results-body">
-      {% if task.status == "done" and result_files %}
+      {% if result_files %}
         <ul class="results-list">
           {% for f in result_files %}
           <li class="result-item">
@@ -87,23 +116,23 @@
               <p class="result-name mono">{{ f.name }}</p>
               <p class="result-size mono">{{ f.size }}</p>
             </div>
-            <a class="btn btn-ghost btn-sm" href="{% url 'download_result' task.pk f.name %}">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M6 10l6 6 6-6M4 20h16"/></svg>
-              Скачать
-            </a>
           </li>
           {% endfor %}
         </ul>
+        <p class="mono hint" style="margin-top:10px">Транскрипт (.txt) скачивается кнопкой выше — он хранится в базе.</p>
+      {% elif task.status == "done" %}
+        <div class="results-placeholder">
+          <p>Runner не оставил отдельных файлов — транскрипт сохранён в базе и доступен для скачивания.</p>
+        </div>
       {% elif task.status == "error" %}
         <div class="results-placeholder warn">
           <p>Выполнение прервалось с ошибкой.</p>
-          <p class="mono">Повторите запуск — журнал сохранится ниже.</p>
+          <p class="mono">Повторите запуск — журнал сохранится.</p>
         </div>
       {% else %}
         <div class="results-placeholder">
           <div class="spinner" aria-hidden="true"></div>
-          <p>Идёт распознавание — файлы появятся здесь.</p>
-          <p class="mono">транскрипт.txt · субтитры.srt · сводка.json</p>
+          <p>Идёт обработка — файлы появятся здесь.</p>
         </div>
       {% endif %}
     </div>

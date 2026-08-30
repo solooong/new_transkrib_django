@@ -7,7 +7,8 @@ services:
     container_name: transkrib-web
     restart: unless-stopped
     ports:
-      - "${TRANSCRIB_PORT:-8000}:8000"
+      - "${TRANSCRIB_PORT:-8000}:8000"     # Django (интерфейс)
+      - "${RUNNER_PORT_HOST:-8800}:8800"   # Flask-runner (для отладки)
     environment:
       DJANGO_DEBUG: "${DJANGO_DEBUG:-1}"
       DJANGO_ALLOWED_HOSTS: "${DJANGO_ALLOWED_HOSTS:-*}"
@@ -18,10 +19,12 @@ services:
       # Каталог и имя файла скрипта транскрибации (volume ./scripts:/app/scripts)
       TRANSCRIBE_SCRIPT_DIR: "${TRANSCRIBE_SCRIPT_DIR:-scripts}"
       TRANSCRIBE_SCRIPT_NAME: "${TRANSCRIBE_SCRIPT_NAME:-1.py}"
-      TRANSCRIBE_CMD: "${TRANSCRIBE_CMD:-}"
+      # Flask-runner (живёт в этом же контейнере, стартует entrypoint'ом)
+      RUNNER_PORT: "8800"
+      RUNNER_URL: "${RUNNER_URL:-http://127.0.0.1:8800}"
+      DJANGO_INTERNAL_BASE: "${DJANGO_INTERNAL_BASE:-http://127.0.0.1:8000}"
+      RUNNER_SECRET: "${RUNNER_SECRET:-dev-runner-secret-change-me}"
       MAX_CONCURRENT_TASKS: "${MAX_CONCURRENT_TASKS:-1}"
-      METRICS_INTERVAL: "${METRICS_INTERVAL:-2}"
-      METRICS_KEEP: "${METRICS_KEEP:-2160}"
     volumes:
       # Скрипт транскрибации (1.py) — кладёте в ./scripts на хосте,
       # попадает в контейнер как есть и проектом не изменяется.
