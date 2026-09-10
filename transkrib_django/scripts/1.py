@@ -457,7 +457,7 @@ def transcribe_audio(audio_path, model_size='large-v3-turbo', enable_diarization
             model_size,
             device="cuda",
             compute_type="float16",
-            download_root="./whisper_models"
+            download_root="F:/git/my_git/apps_my/VOXIMA_BOT/bot_DEMO_Voxima_product/whisper_models"
         )
         check_cuda_memory()
 

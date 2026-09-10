@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import ImportJob
-from ..core.background import launch_background_script
+from core.background import launch_background_script
 
 
 @login_required

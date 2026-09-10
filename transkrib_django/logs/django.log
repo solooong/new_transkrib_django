@@ -35,3 +35,4 @@
 [2026-08-27 19:42:12,812] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
 [2026-08-27 19:42:52,188] INFO core.metrics: metrics collector started (interval=2.0s)
 [2026-08-27 19:42:52,197] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+[2026-09-10 17:57:10,220] INFO django.utils.autoreload: Watching for file changes with StatReloader
