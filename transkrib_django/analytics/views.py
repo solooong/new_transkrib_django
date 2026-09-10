@@ -2,16 +2,15 @@ from django.shortcuts import render
 
 """Представления для аналитики звонков - импорт аудио."""
 import json
-import os
-import subprocess
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import ImportJob
+from ..core.background import launch_background_script
 
 
 @login_required
@@ -41,7 +40,7 @@ def create_import_job(request):
             output_folder=request.POST.get("output_folder", "").strip(),
         )
         job.save()
-        start_import_job(job.pk)
+        _launch(job.pk)
         messages.success(request, f"Задание импорта #{job.pk} создано и запущено.")
         return redirect("analytics_job_detail", job_id=job.pk)
     
@@ -74,47 +73,46 @@ def start_job(request, job_id: int):
     job = get_object_or_404(ImportJob, pk=job_id, user=request.user)
     if job.status == ImportJob.Status.RUNNING:
         return JsonResponse({"error": "Already running"}, status=400)
-    start_import_job(job.pk)
+    _launch(job.pk)
     return redirect("analytics_job_detail", job_id=job.pk)
 
 
-def start_import_job(job_id: int):
-    """Запуск скрипта импорта в фоне."""
-    job = ImportJob.objects.get(pk=job_id)
+def _launch(task_id: int) -> None:
+    """Устанавливает статус RUNNING и запускает скрипт (общая логика)."""
+    from .models import ImportJob
+
+    job = ImportJob.objects.get(pk=task_id)
     job.status = ImportJob.Status.RUNNING
-    job.started_at = __import__('django.utils').utils.timezone.now()
-    job.save(update_fields=["status", "started_at", "updated_at"])
-    
-    # Запуск скрипта в фоне
-    script_path = job.script_path
-    if not os.path.exists(script_path):
+    job.started_at = timezone.now()
+    ok, error = launch_background_script(job.script_path, _build_args(job))
+    if not ok:
         job.status = ImportJob.Status.ERROR
-        job.error = f"Скрипт не найден: {script_path}"
-        job.finished_at = __import__('django.utils').utils.timezone.now()
+        job.error = error
+        job.finished_at = timezone.now()
         job.save(update_fields=["status", "error", "finished_at", "updated_at"])
         return
-    
-    cmd = ["python", script_path]
-    # Добавляем аргументы
+    job.save(update_fields=["status", "started_at", "updated_at"])
+
+
+def _build_args(job) -> list[str]:
+    args: list[str] = []
     if job.date_from:
-        cmd.extend(["--date-from", job.date_from.isoformat()])
+        args.extend(["--date-from", job.date_from.isoformat()])
     if job.date_to:
-        cmd.extend(["--date-to", job.date_to.isoformat()])
+        args.extend(["--date-to", job.date_to.isoformat()])
     if job.phone_filter:
-        cmd.extend(["--phone", job.phone_filter])
+        args.extend(["--phone", job.phone_filter])
     if job.department_filter:
-        cmd.extend(["--department", job.department_filter])
+        args.extend(["--department", job.department_filter])
     if job.output_folder:
-        cmd.extend(["--output", job.output_folder])
+        args.extend(["--output", job.output_folder])
     else:
-        cmd.extend(["--output", job.default_output_folder])
+        args.extend(["--output", job.default_output_folder])
     if job.skip_existing:
-        cmd.append("--skip-existing")
+        args.append("--skip-existing")
     if job.min_duration_sec > 0:
-        cmd.extend(["--min-duration", str(job.min_duration_sec)])
-    
-    # Запускаем в фоне
-    subprocess.Popen(cmd, cwd=settings.BASE_DIR)
+        args.extend(["--min-duration", str(job.min_duration_sec)])
+    return args
 
 
 @login_required
