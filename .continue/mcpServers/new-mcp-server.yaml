@@ -1,4 +1,11 @@
-name: New MCP server
+name: My Custom MCP Servers
 version: 0.0.1
 schema: v1
 mcpServers:
+  # - name: playwright
+  #   type: sse
+  #   url: http://127.0.0.1:3007/sse
+
+  - name: context7
+    type: sse
+    url: http://127.0.0.1:3008/sse
