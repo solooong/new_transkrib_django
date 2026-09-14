@@ -51,6 +51,7 @@ ENV/
 Thumbs.db
 
 # Project specific
-data/
-logs/
+data/db.sqlite3
+data/db.sqlite3-journal
+logs/*.log
 *.sqlite3
