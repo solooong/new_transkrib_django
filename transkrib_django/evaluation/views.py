@@ -1,8 +1,5 @@
 """Представления для оценки звонков."""
 import json
-import os
-import subprocess
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -11,6 +8,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import EvaluationJob
+from core.background import launch_background_script
 
 
 @login_required
@@ -39,7 +37,7 @@ def create_evaluation_job(request):
             eval_only=request.POST.get("eval_only") == "on",
         )
         job.save()
-        start_evaluation_job(job.pk)
+        _launch(job.pk)
         messages.success(request, f"Задание оценки #{job.pk} создано и запущено.")
         return redirect("evaluation_job_detail", job_id=job.pk)
     
@@ -72,15 +70,18 @@ def start_job(request, job_id: int):
     job = get_object_or_404(EvaluationJob, pk=job_id, user=request.user)
     if job.status == EvaluationJob.Status.RUNNING:
         return JsonResponse({"error": "Already running"}, status=400)
-    start_evaluation_job(job.pk)
+    _launch(job.pk)
     return redirect("evaluation_job_detail", job_id=job.pk)
 
 
-def start_evaluation_job(job_id: int):
-    """Запуск скрипта оценки в фоне."""
-    job = EvaluationJob.objects.get(pk=job_id)
+def _launch(task_id: int) -> None:
+    """Устанавливает статус RUNNING и запускает скрипт (общая логика)."""
+    from .models import EvaluationJob
+
+    job = EvaluationJob.objects.get(pk=task_id)
     job.status = EvaluationJob.Status.RUNNING
     job.started_at = timezone.now()
+<<<<<<< HEAD
     job.save(update_fields=["status", "started_at", "updated_at"])
     
     # Запуск скрипта в фоне
@@ -88,19 +89,25 @@ def start_evaluation_job(job_id: int):
     if not os.path.exists(script_path):
         job.status = EvaluationJob.Status.ERROR
         job.error = f"Скрипт не найден: {script_path}"
+=======
+    ok, error = launch_background_script(job.script_path, _build_args(job))
+    if not ok:
+        job.status = EvaluationJob.Status.ERROR
+        job.error = error
+>>>>>>> solooong
         job.finished_at = timezone.now()
         job.save(update_fields=["status", "error", "finished_at", "updated_at"])
         return
-    
-    cmd = ["python", script_path]
-    # Добавляем аргументы согласно логике main из ТЗ
+    job.save(update_fields=["status", "started_at", "updated_at"])
+
+
+def _build_args(job) -> list[str]:
+    args: list[str] = []
     if job.rebuild_excel_only:
-        cmd.append("--rebuild-excel")
+        args.append("--rebuild-excel")
     elif job.eval_only:
-        cmd.append("--eval-only")
-    
-    # Запускаем в фоне
-    subprocess.Popen(cmd, cwd=settings.BASE_DIR)
+        args.append("--eval-only")
+    return args
 
 
 @login_required
