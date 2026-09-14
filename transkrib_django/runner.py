@@ -103,8 +103,21 @@ def _run(payload: dict) -> None:
             return
 
         try:
+            # Формируем команду согласно контракту скрипта 1.py
+            cmd = [sys.executable, script, inp, "--output", out]
+            
+            # Добавляем опции из payload, если они есть
+            if payload.get("model"):
+                cmd.extend(["--model", payload["model"]])
+            if payload.get("diarization"):
+                cmd.append("--diarize")
+            else:
+                cmd.append("--no-diarize")
+            if payload.get("method"):
+                cmd.extend(["--method", payload["method"]])
+            
             proc = subprocess.Popen(
-                [sys.executable, script, "--input", inp, "--output", out],
+                cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,

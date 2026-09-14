@@ -58,6 +58,7 @@ def _build_payload(task) -> dict:
         "language": task.language,
         "model": task.model,
         "diarization": task.diarization,
+        "method": getattr(settings, "DEFAULT_DIARIZATION_METHOD", "spectral"),
         "callback_base": settings.DJANGO_INTERNAL_BASE,
         "secret": settings.RUNNER_SECRET,
     }

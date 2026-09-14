@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 """Представления для аналитики звонков - импорт аудио."""
 import json
 import os
@@ -9,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import ImportJob
@@ -82,7 +81,7 @@ def start_import_job(job_id: int):
     """Запуск скрипта импорта в фоне."""
     job = ImportJob.objects.get(pk=job_id)
     job.status = ImportJob.Status.RUNNING
-    job.started_at = __import__('django.utils').utils.timezone.now()
+    job.started_at = timezone.now()
     job.save(update_fields=["status", "started_at", "updated_at"])
     
     # Запуск скрипта в фоне
@@ -90,7 +89,7 @@ def start_import_job(job_id: int):
     if not os.path.exists(script_path):
         job.status = ImportJob.Status.ERROR
         job.error = f"Скрипт не найден: {script_path}"
-        job.finished_at = __import__('django.utils').utils.timezone.now()
+        job.finished_at = timezone.now()
         job.save(update_fields=["status", "error", "finished_at", "updated_at"])
         return
     
