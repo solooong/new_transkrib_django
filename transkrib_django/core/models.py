@@ -2,6 +2,7 @@
 
 Версия 2: мониторинг системы удалён — остались только транскрибация,
 её журнал, результат (текст) и факт скачивания.
+Версия 3: добавлена поддержка динамических скриптов и django-constance.
 """
 import os
 
@@ -9,6 +10,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from django.db import models
+
+# Импортируем модель скрипта из отдельного файла
+from .models_scripts import ProcessingScript
 
 ALLOWED_EXTENSIONS = [
     "mp3", "wav", "m4a", "ogg", "flac", "aac", "wma", "opus",
@@ -38,6 +42,17 @@ class Task(models.Model):
     language = models.CharField("Язык", max_length=32, default="Русский")
     model = models.CharField("Модель", max_length=64, default="large-v3-turbo")
     diarization = models.BooleanField("Диаризация спикеров", default=True)
+    
+    # Связь с динамическим скриптом (может быть null для обратной совместимости)
+    script = models.ForeignKey(
+        "ProcessingScript",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tasks",
+        verbose_name="Скрипт транскрибации",
+        help_text="Выберите скрипт для обработки. Если не выбран, используется скрипт по умолчанию."
+    )
     
     # Новые поля для аргументов скрипта
     diarization_method = models.CharField("Метод диаризации", max_length=32, default="spectral", 

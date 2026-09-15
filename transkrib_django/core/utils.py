@@ -49,19 +49,38 @@ def runner_health() -> bool:
 
 
 def _build_payload(task) -> dict:
-    """Пакет данных для runner-а: что запускать и куда слать результат."""
-    return {
+    """Пакет данных для runner-а: что запускать и куда слать результат.
+    
+    Поддерживает динамический выбор скрипта через task.script.
+    Если task.script указан, передаётся script_name.
+    Иначе используется settings.TRANSCRIBE_SCRIPT_PATH (для обратной совместимости).
+    """
+    from constance import config
+    
+    payload = {
         "task_id": task.pk,
-        "script": settings.TRANSCRIBE_SCRIPT_PATH,
         "input": task.input_file.path,
         "output_dir": task.result_folder(),
         "language": task.language,
         "model": task.model,
         "diarization": task.diarization,
-        "method": getattr(settings, "DEFAULT_DIARIZATION_METHOD", "spectral"),
+        "diarization_method": task.diarization_method,
+        "timeout": task.timeout_sec,
+        "gpu_id": task.gpu_id,
+        "metadata": task.metadata_json,
         "callback_base": settings.DJANGO_INTERNAL_BASE,
-        "secret": settings.RUNNER_SECRET,
+        "secret": config.RUNNER_SECRET,  # Используем динамическую настройку
     }
+    
+    # Поддержка динамического выбора скрипта
+    if task.script:
+        # Передаём имя скрипта из модели ProcessingScript
+        payload["script_name"] = task.script.file.name
+    else:
+        # Обратная совместимость: используем путь из настроек
+        payload["script"] = settings.TRANSCRIBE_SCRIPT_PATH
+    
+    return payload
 
 
 def _dispatch(task_id: int) -> None:

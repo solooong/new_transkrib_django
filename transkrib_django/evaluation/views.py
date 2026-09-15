@@ -81,7 +81,6 @@ def _launch(task_id: int) -> None:
     job = EvaluationJob.objects.get(pk=task_id)
     job.status = EvaluationJob.Status.RUNNING
     job.started_at = timezone.now()
-<<<<<<< HEAD
     job.save(update_fields=["status", "started_at", "updated_at"])
     
     # Запуск скрипта в фоне
@@ -89,12 +88,7 @@ def _launch(task_id: int) -> None:
     if not os.path.exists(script_path):
         job.status = EvaluationJob.Status.ERROR
         job.error = f"Скрипт не найден: {script_path}"
-=======
-    ok, error = launch_background_script(job.script_path, _build_args(job))
-    if not ok:
-        job.status = EvaluationJob.Status.ERROR
-        job.error = error
->>>>>>> solooong
+
         job.finished_at = timezone.now()
         job.save(update_fields=["status", "error", "finished_at", "updated_at"])
         return

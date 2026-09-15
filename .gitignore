@@ -21,6 +21,10 @@ wheels/
 .installed.cfg
 *.egg
 
+# Logs
+logs/
+*.log
+
 # Environment
 .env
 .env.local
