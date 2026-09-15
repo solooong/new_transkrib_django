@@ -78,8 +78,26 @@ def _read_transcript(output_dir: str) -> str:
 # --------------------------------------------------------------------------- исполнение
 
 def _run(payload: dict) -> None:
+    """Запуск скрипта транскрибации.
+    
+    Поддерживает динамический выбор скрипта через script_name.
+    Если script_name указан, скрипт ищется в директории scripts/.
+    """
     task_id = payload["task_id"]
-    script = payload["script"]
+    
+    # Поддержка динамического выбора скрипта
+    script_name = payload.get("script_name")  # Новое: имя скрипта из ProcessingScript
+    script = payload.get("script")  # Старое: полный путь (для совместимости)
+    
+    # Если указан script_name, формируем полный путь
+    if script_name:
+        # script_name приходит как "scripts/1.py" или просто "1.py"
+        if not script_name.startswith("scripts/"):
+            script_name = f"scripts/{script_name}"
+        # Формируем абсолютный путь
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        script = os.path.join(base_dir, script_name)
+    
     inp = payload["input"]
     out = payload["output_dir"]
     cb = payload["callback_base"].rstrip("/")
@@ -92,8 +110,10 @@ def _run(payload: dict) -> None:
 
     with _semaphore:
         os.makedirs(out, exist_ok=True)
+        
+        script_display = script_name if script_name else os.path.basename(script)
         _post(log_url, {"task_id": task_id, "level": "info",
-                        "text": f"[runner] запуск: python {os.path.basename(script)} --input … --output …"}, secret)
+                        "text": f"[runner] запуск: python {script_display} --input … --output …"}, secret)
 
         if not os.path.isfile(script):
             _post(log_url, {"task_id": task_id, "level": "err",

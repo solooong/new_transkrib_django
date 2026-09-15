@@ -36,10 +36,42 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Сторонние приложения
+    "constance",
+    "constance.backends.database",
+    # Локальные приложения
     "core",
     "analytics",
     "evaluation",
 ]
+
+# =============================================================================
+# Динамические настройки через django-constance
+# =============================================================================
+# Позволяет изменять настройки "на лету" через админку без перезапуска контейнера
+CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
+
+CONSTANCE_CONFIG = {
+    "MAX_CONCURRENT_TASKS": (1, "Максимальное количество одновременных задач транскрибации", int),
+    "RUNNER_SECRET": ("dev-runner-secret-change-me", "Секрет защиты callback-API runner'а", str),
+    "DEFAULT_LANGUAGE": ("ru", "Язык транскрибации по умолчанию", str),
+    "DEFAULT_MODEL": ("whisper-large-v3", "Модель Whisper по умолчанию", str),
+    "TASK_TIMEOUT_MINUTES": (60, "Таймаут выполнения задачи в минутах", int),
+    "ENABLE_DIARIZATION": (True, "Включить диаризацию по умолчанию", bool),
+}
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    "Настройки транскрибации": (
+        "DEFAULT_LANGUAGE",
+        "DEFAULT_MODEL",
+        "ENABLE_DIARIZATION",
+        "TASK_TIMEOUT_MINUTES",
+    ),
+    "Настройки системы": (
+        "MAX_CONCURRENT_TASKS",
+        "RUNNER_SECRET",
+    ),
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

@@ -3,6 +3,7 @@ Django==5.0.14
 whitenoise==6.7.0
 Flask==3.0.3
 requests==2.32.3
+django-constance[database]==3.1.0
 
 # Транскрибация и обработка аудио
 openai-whisper==20231117
