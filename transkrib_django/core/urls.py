@@ -1,6 +1,7 @@
 from django.urls import path
 
-from . import views
+from .views import (dashboard,upload_file,task_detail,download_txt,download_txt,retry_task,delete_task, 
+                        api_tasks,api_task_logs,api_runner_status,runner_log,runner_progress,runner_done,runner_error)
 
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
