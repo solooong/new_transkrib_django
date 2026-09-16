@@ -1,18 +1,43 @@
+# Django и веб-интерфейс
 Django==5.0.14
 whitenoise==6.7.0
 Flask==3.0.3
 requests==2.32.3
+<<<<<<< HEAD
 openai-whisper
+=======
+django-constance[database]==3.1.0
+
+# Транскрибация и обработка аудио
+openai-whisper==20231117
+>>>>>>> 02fb2d110c23c3aa2cea55d730a11936de07e850
 torch==2.1.2
 torchaudio==2.1.2
 pydub==0.25.1
 ffmpeg-python==0.2.0
+<<<<<<< HEAD
 pyannote.audio==3.1.1
 speechbrain==1.0.0
+=======
+
+# Диаризация (разделение по спикерам)
+pyannote.audio==3.1.1
+speechbrain==1.0.0
+
+# Обработка данных и Excel
+>>>>>>> 02fb2d110c23c3aa2cea55d730a11936de07e850
 pandas==2.1.4
 openpyxl==3.1.2
 numpy==1.26.3
 scipy==1.11.4
+<<<<<<< HEAD
 python-dotenv==1.0.0
+=======
+
+# Переменные окружения
+python-dotenv==1.0.0
+
+# Дополнительные утилиты
+>>>>>>> 02fb2d110c23c3aa2cea55d730a11936de07e850
 tqdm==4.66.1
 more-itertools==10.1.0

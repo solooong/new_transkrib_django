@@ -35,6 +35,7 @@
 [2026-08-27 19:42:12,812] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
 [2026-08-27 19:42:52,188] INFO core.metrics: metrics collector started (interval=2.0s)
 [2026-08-27 19:42:52,197] INFO core.metrics: pynvml: GPU недоступен, метрика gpu отключена
+<<<<<<< HEAD
 [2026-09-14 17:02:41,549] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2026-09-14 17:02:55,096] INFO django.server: "GET / HTTP/1.1" 302 0
 [2026-09-14 17:02:55,107] INFO django.server: "GET /login/?next=/ HTTP/1.1" 200 2484
@@ -27160,3 +27161,5 @@ Traceback (most recent call last):
     raise InvalidStorageError(
 django.core.files.storage.handler.InvalidStorageError: Could not find config for 'default' in settings.STORAGES.
 [2026-09-16 08:58:51,108] ERROR django.server: "POST /uploads/ HTTP/1.1" 500 169697
+=======
+>>>>>>> 02fb2d110c23c3aa2cea55d730a11936de07e850

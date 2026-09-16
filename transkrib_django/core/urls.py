@@ -5,7 +5,7 @@ from .views import (dashboard,upload_file,task_detail,download_txt,download_txt,
 
 urlpatterns = [
     path("", dashboard, name="dashboard"),
-    path("uploads/", upload_file, name="upload"),
+    path("upload/", upload_file, name="upload"),
     path("task/<int:task_id>/", task_detail, name="task_detail"),
     path("task/<int:task_id>/download/", download_txt, name="download_txt"),
     path("task/<int:task_id>/retry/", retry_task, name="retry_task"),

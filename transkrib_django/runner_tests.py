@@ -5,10 +5,18 @@ import tempfile
 from unittest.mock import patch, MagicMock
 from django.test import TestCase
 from django.test.client import Client as DjangoClient
+<<<<<<< HEAD
 # Импортируем runner для тестирования
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import runner as runner
+=======
+
+# Импортируем runner для тестирования
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+import runner
+>>>>>>> 02fb2d110c23c3aa2cea55d730a11936de07e850
 
 
 class RunnerFlaskTest(TestCase):
