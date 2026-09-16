@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 """Представления для аналитики звонков - импорт аудио."""
 import json
 from django.contrib import messages
@@ -8,7 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-
+import os
 from .models import ImportJob
 from core.background import launch_background_script
 
@@ -84,10 +82,13 @@ def _launch(task_id: int) -> None:
     job = ImportJob.objects.get(pk=task_id)
     job.status = ImportJob.Status.RUNNING
     job.started_at = timezone.now()
-    ok, error = launch_background_script(job.script_path, _build_args(job))
-    if not ok:
+    job.save(update_fields=["status", "started_at", "updated_at"])
+    
+    # Запуск скрипта в фоне
+    script_path = job.script_path
+    if not os.path.exists(script_path):
         job.status = ImportJob.Status.ERROR
-        job.error = error
+        job.error = f"Скрипт не найден: {script_path}"
         job.finished_at = timezone.now()
         job.save(update_fields=["status", "error", "finished_at", "updated_at"])
         return

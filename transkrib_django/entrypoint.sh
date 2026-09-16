@@ -17,7 +17,7 @@ if ! python -c "import importlib,sys; sys.path.insert(0,'/app'); importlib.impor
 fi
 
 echo "[entrypoint] миграции..."
-python manage.py makemigrations core --noinput
+python manage.py makemigrations --noinput
 python manage.py migrate --noinput
 
 echo "[entrypoint] статика..."

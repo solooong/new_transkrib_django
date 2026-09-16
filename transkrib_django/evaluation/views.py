@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 """Представления для оценки звонков."""
 import json
 from django.contrib import messages
