@@ -181,12 +181,14 @@ def run():
     payload = request.get_json(force=True, silent=True) or {}
     if payload.get("secret") != RUNNER_SECRET:
         return jsonify({"error": "unauthorized"}), 401
-    if "task_id" not in payload or "script" not in payload:
-        return jsonify({"error": "bad payload"}), 400
+    
+    # ✅ Теперь принимаем либо старый 'script', либо новый 'script_name'
+    has_script = "script" in payload or "script_name" in payload
+    if "task_id" not in payload or not has_script:
+        return jsonify({"error": "bad payload: task_id and (script or script_name) are required"}), 400
 
     threading.Thread(target=_run, args=(payload,), name=f"task-{payload['task_id']}", daemon=True).start()
     return jsonify({"status": "accepted", "task_id": payload["task_id"]}), 202
-
 
 if __name__ == "__main__":
     print(f"[runner] старт на :{RUNNER_PORT} · max_concurrent={MAX_CONCURRENT}", flush=True)

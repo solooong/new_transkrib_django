@@ -172,12 +172,12 @@ class TaskLogAdmin(admin.ModelAdmin):
 # Кастомная админка для User с группами
 # =============================================================================
 
-@admin.register(User)
-class CustomUserAdmin(BaseUserAdmin):
-    """Управление пользователями с отображением групп."""
-    list_display = ("username", "email", "is_staff", "is_active", "get_groups")
-    list_filter = ("is_staff", "is_active", "groups")
+# @admin.register(User)
+# class CustomUserAdmin(BaseUserAdmin):
+#     """Управление пользователями с отображением групп."""
+#     list_display = ("username", "email", "is_staff", "is_active", "get_groups")
+#     list_filter = ("is_staff", "is_active", "groups")
     
-    @admin.display(description="Группы")
-    def get_groups(self, obj):
-        return ", ".join([g.name for g in obj.groups.all()])
+#     @admin.display(description="Группы")
+#     def get_groups(self, obj):
+#         return ", ".join([g.name for g in obj.groups.all()])
